@@ -1,0 +1,5 @@
+# Development requirements
+pylint
+pytest
+pytest-env
+tox
