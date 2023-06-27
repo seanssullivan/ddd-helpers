@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# pylint: disable=missing-function-docstring
+
 # Standard Library Imports
 from datetime import datetime
 from typing import Type
@@ -13,7 +15,7 @@ from ddd.messages import BaseCommand
 from ddd.messages import BaseEvent
 
 
-@pytest.mark.parametrize("message_type", [BaseMessage, BaseCommand, BaseEvent])
-def test_has_created_at_datetime(message_type: Type[BaseMessage]) -> None:
-    result = message_type()
+@pytest.mark.parametrize("message", [BaseMessage, BaseCommand, BaseEvent])
+def test_has_created_at_datetime(message: Type[BaseMessage]) -> None:
+    result = message()
     assert isinstance(result.created_at, datetime)
