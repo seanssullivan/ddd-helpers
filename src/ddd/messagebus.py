@@ -4,13 +4,13 @@
 This module defines message-bus classes which dispatch commands
 and events to their respective handlers.
 
-Commands are simple data structures which capture an intent for the system to
+Commands are simple data structures that capture an intent for the system to
 perform a particular action: commands are always matched to a single handler.
 When a command is executed, there is an expectation that an event will occur
 as a result; whenever a process fails, the process or user that created the
 command must receive an error message containing pertinent information.
 
-Events are data structures which are broadcast to all subscribed listeners.
+Events are data structures that are broadcast to all subscribed listeners.
 Events are never assigned to dedicated event handlers. Instead, handlers are
 registered with the message bus and wait for an event to occur before
 performing a particular action. Events reflect business logic described in
@@ -121,7 +121,7 @@ class BaseMessageBus(AbstractMessageBus):
         Provided message is passed to an appropriate handler function.
 
         Args:
-            message: Command or Event.
+            message: Message.
 
         """
         self.queue = MessageQueue([message])

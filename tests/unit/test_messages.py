@@ -16,6 +16,7 @@ from ddd.messages import BaseEvent
 
 
 @pytest.mark.parametrize("message", [BaseMessage, BaseCommand, BaseEvent])
-def test_has_created_at_datetime(message: Type[BaseMessage]) -> None:
+def test_sets_created_at_attribute(message: Type[BaseMessage]) -> None:
     result = message()
+    assert getattr(result, "created_at", None) is not None
     assert isinstance(result.created_at, datetime)

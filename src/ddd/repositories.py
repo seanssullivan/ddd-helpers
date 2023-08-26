@@ -36,6 +36,7 @@ __all__ = [
 ADD_METHOD = "add"
 GET_METHOD = "get"
 LIST_METHOD = "list"
+REMOVE_METHOD = "remove"
 
 
 class AbstractRepository(abc.ABC):
@@ -70,6 +71,16 @@ class AbstractRepository(abc.ABC):
 
         Returns:
             Objects in repository.
+
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def remove(self, obj: object) -> None:
+        """Remove object from repository.
+
+        Args:
+            obj: Object to remove from repository.
 
         """
         raise NotImplementedError
@@ -147,6 +158,9 @@ class Tracker(abc.ABCMeta):
         if name == LIST_METHOD:
             return cls.wrap_list_method(method)
 
+        if name == REMOVE_METHOD:
+            return cls.wrap_remove_method(method)
+
         return method
 
     @staticmethod
@@ -213,6 +227,26 @@ class Tracker(abc.ABCMeta):
         functools.update_wrapper(wrapper, method)
         return wrapper
 
+    @staticmethod
+    def wrap_remove_method(method: FunctionType) -> FunctionType:
+        """Wrap `remove` method.
+
+        Args:
+            method: Method to wrap.
+
+        Returns:
+            Wrapped method.
+
+        """
+
+        @functools.wraps(method)
+        def wrapper(self: AbstractTrackingRepository, obj: object) -> None:
+            method(self, obj)
+            self.seen.discard(obj)
+
+        functools.update_wrapper(wrapper, method)
+        return wrapper
+
 
 class AbstractTrackingRepository(AbstractRepository, metaclass=Tracker):
     """Represents an abstract tracking repository."""
@@ -245,11 +279,6 @@ class EventfulRepository(AbstractEventfulRepository):
     @property
     def events(self) -> MessageQueue:
         """Events."""
-        for obj in self.seen:
-            while getattr(obj, "events", None):
-                event = obj.events.popleft()
-                self._events.append(event)
-
         return self._events
 
     def collect_events(self) -> Generator[BaseEvent, None, None]:
@@ -259,5 +288,15 @@ class EventfulRepository(AbstractEventfulRepository):
             Events.
 
         """
+        self._collect_child_events()
         while self.events:
             yield self.events.popleft()
+
+    def _collect_child_events(self) -> None:
+        """Collect events from child objects."""
+        for obj in self.seen:
+            while getattr(obj, "events", None):
+                event = obj.events.popleft()
+                self.events.append(event)
+
+        self.events.sort()

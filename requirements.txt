@@ -1,5 +1,6 @@
 # Development requirements
+coverage
 pylint
 pytest
-pytest-env
+pytest-cov
 tox
