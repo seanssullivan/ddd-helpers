@@ -12,23 +12,16 @@ Implementation based on 'Architecture Patterns in Python' repository pattern.
 import abc
 import functools
 from types import FunctionType
-from typing import Deque
-from typing import Generator
 from typing import List
 from typing import Set
 from typing import Union
 
 # Local Imports
-from .models import AbstractAggregate
-from .messages import AbstractEvent
-from .messages import BaseEvent
-from .queue import MessageQueue
+from ..models import AbstractAggregate
+from .abstract_repository import AbstractRepository
 
 __all__ = [
-    "AbstractRepository",
     "AbstractTrackingRepository",
-    "AbstractEventfulRepository",
-    "EventfulRepository",
 ]
 
 
@@ -37,68 +30,6 @@ ADD_METHOD = "add"
 GET_METHOD = "get"
 LIST_METHOD = "list"
 REMOVE_METHOD = "remove"
-
-
-class AbstractRepository(abc.ABC):
-    """Represents an abstract repository."""
-
-    @abc.abstractmethod
-    def add(self, obj: object) -> None:
-        """Add object to repository.
-
-        Args:
-            obj: Object to add to repository.
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def get(self, ref: Union[int, str]) -> object:
-        """Get object from repository.
-
-        Args:
-            ref: Reference to object.
-
-        Returns:
-            Object.
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def list(self) -> List[object]:
-        """List objects in repository.
-
-        Returns:
-            Objects in repository.
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def remove(self, obj: object) -> None:
-        """Remove object from repository.
-
-        Args:
-            obj: Object to remove from repository.
-
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def close(self) -> None:
-        """Close connection to repository."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def commit(self) -> None:
-        """Commit changes to repository."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def rollback(self) -> None:
-        """Rollback changes to repository."""
-        raise NotImplementedError
 
 
 class Tracker(abc.ABCMeta):
@@ -251,52 +182,21 @@ class Tracker(abc.ABCMeta):
 class AbstractTrackingRepository(AbstractRepository, metaclass=Tracker):
     """Represents an abstract tracking repository."""
 
-    seen: Set[AbstractAggregate]
-
-
-class AbstractEventfulRepository(AbstractTrackingRepository):
-    """Represents an abstract eventful repository."""
-
     @property
     @abc.abstractmethod
-    def events(self) -> Deque[AbstractEvent]:
-        """Events."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def collect_events(self) -> Generator[AbstractEvent, None, None]:
-        """Collect events."""
+    def seen(self) -> Set[AbstractAggregate]:
+        """Objects seen."""
         raise NotImplementedError
 
 
-class EventfulRepository(AbstractEventfulRepository):
-    """Implements an eventful repository."""
+class TrackingRepository(AbstractTrackingRepository):
+    """Implements a tracking repository."""
 
     def __init__(self) -> None:
         super().__init__()
-        self._events = MessageQueue()
+        self._seen = set()
 
     @property
-    def events(self) -> MessageQueue:
-        """Events."""
-        return self._events
-
-    def collect_events(self) -> Generator[BaseEvent, None, None]:
-        """Collect events.
-
-        Yields:
-            Events.
-
-        """
-        self._collect_child_events()
-        while self.events:
-            yield self.events.popleft()
-
-    def _collect_child_events(self) -> None:
-        """Collect events from child objects."""
-        for obj in self.seen:
-            while getattr(obj, "events", None):
-                event = obj.events.popleft()
-                self.events.append(event)
-
-        self.events.sort()
+    def seen(self) -> Set[AbstractAggregate]:
+        """Objects seen."""
+        return self._seen
