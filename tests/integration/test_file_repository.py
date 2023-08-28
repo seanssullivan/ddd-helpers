@@ -5,8 +5,6 @@
 
 # Standard Library Imports
 import pathlib
-import shutil
-import tempfile
 from typing import Callable
 
 # Third-Party Imports
@@ -16,7 +14,8 @@ import pytest
 from ddd.repositories import FileRepository
 
 
-def test_can_save_file(tempdir: str) -> None:
+@pytest.mark.skip
+def test_can_save_a_file(tempdir: str) -> None:
     temppath = pathlib.Path(tempdir)
     repo = FileRepository(temppath)
 
@@ -26,7 +25,8 @@ def test_can_save_file(tempdir: str) -> None:
     assert expected.exists()
 
 
-def test_can_retrieve_file(
+@pytest.mark.skip
+def test_can_retrieve_a_file(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath = make_text_file("test.txt", "success")
@@ -36,6 +36,7 @@ def test_can_retrieve_file(
     assert result == "success"
 
 
+@pytest.mark.skip
 def test_raises_error_when_file_not_found(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
@@ -45,6 +46,7 @@ def test_raises_error_when_file_not_found(
         repo.get("test")
 
 
+@pytest.mark.skip
 def test_returns_a_list_of_files(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:

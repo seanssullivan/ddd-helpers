@@ -28,7 +28,7 @@ def tempdir() -> str:
 @pytest.fixture
 def make_text_file(tempdir: str) -> Callable[..., pathlib.Path]:
     """Fixture to make text file."""
-    yield partial(make_file, tempdir, mode="w")
+    yield partial(make_file, pathlib.Path(tempdir), mode="w")
 
 
 def make_file(
@@ -48,6 +48,10 @@ def make_file(
         mode: Write mode. Default ``w``.
 
     """
+    if not isinstance(__dir, pathlib.Path):
+        message = f"expected type 'Path', got {type(__dir)} instead"
+        raise TypeError(message)
+
     filepath = __dir / filename  # type: pathlib.Path
     with filepath.open(mode) as file:
         file.write(content)
