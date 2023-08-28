@@ -42,7 +42,6 @@ class Tracker(abc.ABCMeta):
 
     def __call__(cls, *args, **kwargs) -> AbstractRepository:
         instance = super().__call__(*args, **kwargs)
-        setattr(instance, "seen", set())
         return instance
 
     @classmethod
