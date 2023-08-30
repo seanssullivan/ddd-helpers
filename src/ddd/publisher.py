@@ -5,7 +5,7 @@ import abc
 from dataclasses import asdict
 import logging
 import json
-from operator import methodcaller
+import operator
 
 # Local Imports
 from .messages import event
@@ -49,4 +49,5 @@ class BasePublisher(AbstractPublisher):
         log.info("publishing: channel=%s, event=%s", channel, event)
         payload = json.dumps(asdict(event))
 
-        methodcaller("publish", channel, payload)(self.connection)
+        publish_to = operator.methodcaller("publish", channel, payload)
+        publish_to(self.connection)
