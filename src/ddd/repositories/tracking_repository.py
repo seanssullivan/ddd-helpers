@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Abstract Repository.
+"""Tracking Repository.
 
 Implementation based on 'Architecture Patterns in Python' repository pattern.
 
@@ -22,7 +22,7 @@ from .abstract_repository import AbstractRepository
 
 __all__ = [
     "AbstractTrackingRepository",
-    "Tracker",
+    "TrackingRepository",
 ]
 
 

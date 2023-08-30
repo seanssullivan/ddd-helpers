@@ -88,7 +88,7 @@ class AbstractMessageBus(abc.ABC):
 
 
 class BaseMessageBus(AbstractMessageBus):
-    """Implements a base class for message buses.
+    """Implements a base class for message buses to inherit.
 
     Args:
         uow: Unit of work.

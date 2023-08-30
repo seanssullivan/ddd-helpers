@@ -11,32 +11,32 @@ from typing import Callable
 import pytest
 
 # Local Imports
+from ddd.models import File
 from ddd.repositories import FileRepository
 
 
-@pytest.mark.skip
-def test_can_save_a_file(tempdir: str) -> None:
+def test_saves_a_text_file(tempdir: str) -> None:
     temppath = pathlib.Path(tempdir)
     repo = FileRepository(temppath)
 
-    repo.add("test.txt", "success")
+    file = File("test.txt", "success")
+    repo.add(file)
 
     expected = temppath / "test.txt"
     assert expected.exists()
 
 
-@pytest.mark.skip
-def test_can_retrieve_a_file(
+def test_retrieves_a_text_file(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath = make_text_file("test.txt", "success")
     repo = FileRepository(filepath.parent)
     result = repo.get("test")
 
-    assert result == "success"
+    expected = File("test.txt", "success")
+    assert result == expected
 
 
-@pytest.mark.skip
 def test_raises_error_when_file_not_found(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
@@ -46,7 +46,6 @@ def test_raises_error_when_file_not_found(
         repo.get("test")
 
 
-@pytest.mark.skip
 def test_returns_a_list_of_files(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
@@ -55,7 +54,7 @@ def test_returns_a_list_of_files(
     filepath3 = make_text_file("test3.txt", "three")
     repo = FileRepository(filepath1.parent)
 
-    results = repo.list("test")
+    results = repo.list("*test*")
 
     assert sorted(results, key=lambda f: f[0]) == [
         filepath1.name,

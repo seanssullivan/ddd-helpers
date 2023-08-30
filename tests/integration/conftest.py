@@ -26,6 +26,12 @@ def tempdir() -> str:
 
 
 @pytest.fixture
+def make_bytes_file(tempdir: str) -> Callable[..., pathlib.Path]:
+    """Fixture to make text file."""
+    yield partial(make_file, pathlib.Path(tempdir), mode="wb")
+
+
+@pytest.fixture
 def make_text_file(tempdir: str) -> Callable[..., pathlib.Path]:
     """Fixture to make text file."""
     yield partial(make_file, pathlib.Path(tempdir), mode="w")

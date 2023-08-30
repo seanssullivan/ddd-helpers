@@ -12,7 +12,7 @@ import abc
 from typing import Deque
 
 # Local Imports
-from .messages import AbstractEvent
+from ..messages import AbstractEvent
 
 __all__ = [
     "AbstractModel",

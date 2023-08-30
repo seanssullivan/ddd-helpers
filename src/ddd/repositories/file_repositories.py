@@ -9,6 +9,7 @@ from typing import Union
 
 # Local Imports
 from .abstract_repository import AbstractRepository
+from ..models import File
 
 __all__ = ["FileRepository"]
 
@@ -59,7 +60,6 @@ class FileRepository(AbstractRepository):
             Whether a matching file exists.
 
         """
-
         try:
             self._find_filepath(reference)
         except FileNotFoundError:
@@ -67,37 +67,43 @@ class FileRepository(AbstractRepository):
         else:
             return True
 
-    def add(self, filename: str, content: str) -> pathlib.Path:
+    def add(self, obj: object) -> pathlib.Path:
         """Add file to repository.
 
         Args:
-            filename: Filename.
-            content: Content to store in file.
+            obj: File.
 
         Returns:
             Filepath.
 
+        Raises:
+            TypeError: when argument type not 'File'.
+
         """
-        filepath = self._make_filepath(filename)
+        if not isinstance(obj, File):
+            message = f"expected type 'File', got {type(obj)} instead"
+            raise TypeError(message)
+
+        filepath = self._make_filepath(obj.name)
         if not os.path.exists(filepath):
             with filepath.open("w") as file:
-                file.write(content)
+                file.write(obj.content)
 
         return filepath
 
-    def get(self, ref: Union[int, str]) -> str:
+    def get(self, ref: Union[int, str]) -> File:
         """Get file in repository.
 
         Args:
             ref: Reference to filename.
 
         Returns:
-            File content.
+            File.
 
         """
         filepath = self._find_filepath(str(ref))
         content = self._read_file(filepath)
-        return content
+        return File(filepath.name, content)
 
     def _find_filepath(
         self, reference: str, extension: str = "*"
@@ -180,7 +186,7 @@ class FileRepository(AbstractRepository):
         return result
 
     @staticmethod
-    def _read_file(filepath: pathlib.Path) -> bytes:
+    def _read_file(filepath: pathlib.Path) -> Union[bytes, str]:
         """Read file.
 
         Args:
@@ -201,8 +207,12 @@ class FileRepository(AbstractRepository):
             message = f"{filepath.name} does not exist in {filepath.parent}"
             raise FileNotFoundError(message)
 
-        with filepath.open("rb") as file:
-            result = file.read()
+        try:
+            with filepath.open("tr") as file:
+                result = file.read()
+        except:
+            with filepath.open("rb") as file:
+                result = file.read()
 
         return result
 
@@ -227,14 +237,18 @@ class FileRepository(AbstractRepository):
         results = [path.name for path in filepaths]
         return results
 
-    def remove(self, filename: str) -> None:
+    def remove(self, obj: object) -> None:
         """Remove file from repository.
 
         Args:
-            filename: Filename.
+            obj: File.
 
         """
-        filepath = self._make_filepath(filename)
+        if not isinstance(obj, File):
+            message = f"expected type 'File', got {type(obj)} instead"
+            raise TypeError(message)
+
+        filepath = self._make_filepath(obj.name)
         if os.path.isfile(filepath):
             os.remove(filepath)
 
