@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
+import abc
 import logging
 import os
 import pathlib
 from typing import List
+from typing import Optional
 from typing import Union
 
 # Local Imports
@@ -18,6 +20,16 @@ __all__ = ["FileRepository"]
 log = logging.getLogger(__name__)
 
 
+class AbstractFileRepository(AbstractRepository):
+    """Represents an abstract file repository."""
+
+    @property
+    @abc.abstractmethod
+    def directory(self) -> pathlib.Path:
+        """Directory of repository."""
+        raise NotImplementedError
+
+
 class FileRepository(AbstractRepository):
     """Implements a file repository.
 
@@ -25,6 +37,9 @@ class FileRepository(AbstractRepository):
 
     Args:
         __dir: Path to directory containing files.
+
+    Attributes:
+        directory: Directory of repository.
 
     """
 
@@ -91,7 +106,7 @@ class FileRepository(AbstractRepository):
 
         return filepath
 
-    def get(self, ref: Union[int, str]) -> File:
+    def get(self, ref: Union[int, str]) -> Optional[File]:
         """Get file in repository.
 
         Args:
@@ -101,9 +116,14 @@ class FileRepository(AbstractRepository):
             File.
 
         """
-        filepath = self._find_filepath(str(ref))
-        content = self._read_file(filepath)
-        return File(filepath.name, content)
+        try:
+            filepath = self._find_filepath(str(ref))
+            content = self._read_file(filepath)
+        except FileNotFoundError:
+            return None
+        else:
+            result = File(filepath.name, content)
+            return result
 
     def _find_filepath(
         self, reference: str, extension: str = "*"
@@ -187,7 +207,7 @@ class FileRepository(AbstractRepository):
 
     @staticmethod
     def _read_file(filepath: pathlib.Path) -> Union[bytes, str]:
-        """Read file.
+        """Read file in repository.
 
         Args:
             filepath: Filepath.
@@ -216,26 +236,14 @@ class FileRepository(AbstractRepository):
 
         return result
 
-    def list(self, query: str, recursive=False, reverse=False) -> List[str]:
+    def list(self) -> List[File]:
         """List files in repository.
 
-        Args:
-            query: Query to search for among filenames.
-            recursive (optional): Whether to also search subdirectories.
-            reverse (optional): Whether to sort results in reverse.
-
         Returns:
-            Filenames.
+            Files.
 
         """
-        filepaths = sorted(
-            self.directory.glob(query)
-            if not recursive
-            else self.directory.rglob(query),
-            reverse=reverse,
-        )
-        results = [path.name for path in filepaths]
-        return results
+        raise NotImplementedError
 
     def remove(self, obj: object) -> None:
         """Remove file from repository.
@@ -265,8 +273,28 @@ class FileRepository(AbstractRepository):
         result = self.directory / filename
         return result
 
-    def close(self) -> None:
-        """Close connection to repository."""
+    def search_filenames(
+        self, query: str, recursive=False, reverse=False
+    ) -> List[str]:
+        """Search filenames in repository.
+
+        Args:
+            query: Query to search for among filenames.
+            recursive (optional): Whether to also search subdirectories.
+            reverse (optional): Whether to sort results in reverse.
+
+        Returns:
+            Filenames.
+
+        """
+        filepaths = sorted(
+            self.directory.glob(query)
+            if not recursive
+            else self.directory.rglob(query),
+            reverse=reverse,
+        )
+        results = [path.name for path in filepaths]
+        return results
 
     def commit(self) -> None:
         """Commit changes to files in repository."""

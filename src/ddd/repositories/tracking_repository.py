@@ -190,7 +190,12 @@ class AbstractTrackingRepository(AbstractRepository, metaclass=Tracker):
 
 
 class TrackingRepository(AbstractTrackingRepository):
-    """Implements a tracking repository."""
+    """Implements a tracking repository.
+
+    Attributes:
+        seen: Objects seen.
+
+    """
 
     def __init__(self) -> None:
         super().__init__()

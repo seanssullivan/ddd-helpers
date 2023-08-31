@@ -63,11 +63,6 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def close(self) -> None:
-        """Close connection to repository."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def commit(self) -> None:
         """Commit changes to repository."""
         raise NotImplementedError

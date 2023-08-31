@@ -37,16 +37,16 @@ def test_retrieves_a_text_file(
     assert result == expected
 
 
-def test_raises_error_when_file_not_found(
+def test_returns_none_when_file_not_found(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath = make_text_file("sample.txt", "test")
     repo = FileRepository(filepath.parent)
-    with pytest.raises(FileNotFoundError):
-        repo.get("test")
+    result = repo.get("test")
+    assert not result
 
 
-def test_returns_a_list_of_files(
+def test_returns_a_list_of_filenames(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath1 = make_text_file("test1.txt", "one")
@@ -54,7 +54,7 @@ def test_returns_a_list_of_files(
     filepath3 = make_text_file("test3.txt", "three")
     repo = FileRepository(filepath1.parent)
 
-    results = repo.list("*test*")
+    results = repo.search_filenames("*test*")
 
     assert sorted(results, key=lambda f: f[0]) == [
         filepath1.name,

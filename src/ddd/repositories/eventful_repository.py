@@ -42,7 +42,12 @@ class AbstractEventfulRepository(AbstractTrackingRepository):
 
 
 class EventfulRepository(TrackingRepository, AbstractEventfulRepository):
-    """Implements an eventful repository."""
+    """Implements an eventful repository.
+
+    Attributes:
+        events: Events.
+
+    """
 
     def __init__(self) -> None:
         super().__init__()

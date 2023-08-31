@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Standard Imports
+# Standard Library Imports
 import abc
 from dataclasses import asdict
 import logging
 import json
 import operator
+from typing import Any
 
 # Local Imports
-from .messages import event
+from ..messages import event
 
-__all__ = [
-    "AbstractPublisher",
-    "BasePublisher",
-]
+__all__ = ["AbstractPublisher"]
 
 
 # Initialize logger.
@@ -25,18 +23,9 @@ class AbstractPublisher(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def connection(self) -> object:
+    def connection(self) -> Any:
         """Connection."""
         raise NotImplementedError
-
-    @abc.abstractmethod
-    def publish(self, channel: str, event: event.BaseEvent, /) -> None:
-        """Publish event to channel."""
-        raise NotImplementedError
-
-
-class BasePublisher(AbstractPublisher):
-    """Implements a base class for publishers to inherit."""
 
     def publish(self, channel: str, event: event.BaseEvent, /) -> None:
         """publishes an event to an external message broker.
