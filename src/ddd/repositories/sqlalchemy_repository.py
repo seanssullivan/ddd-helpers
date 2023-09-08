@@ -2,6 +2,7 @@
 
 # Standard Library Imports
 import abc
+from typing import Any
 from typing import TYPE_CHECKING
 
 # Local Imports
@@ -23,6 +24,20 @@ class AbstractSqlAlchemyRepository(AbstractRepository):
     @abc.abstractmethod
     def session(self) -> "Session":
         """SQLAlchemy session."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def execute(self, *args, **kwargs) -> Any:
+        """Call the execute method directly on the SQLAlchemy session.
+
+        Args:
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Result.
+
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -53,6 +68,20 @@ class SqlAlchemyRepository(AbstractSqlAlchemyRepository):
     def session(self) -> "Session":
         """SQLAlchemy session."""
         return self._session
+
+    def execute(self, *args, **kwargs) -> Any:
+        """Call the execute method directly on the SQLAlchemy session.
+
+        Args:
+            *args: Positional arguments.
+            **kwargs: Keyword arguments.
+
+        Returns:
+            Result.
+
+        """
+        result = self.session.execute(*args, **kwargs)
+        return result
 
     def close(self) -> None:
         """Close connection to repository."""
