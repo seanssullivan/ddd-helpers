@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
-from functools import partial
+import csv
+import functools
 import pathlib
 import shutil
 import tempfile
 from typing import Callable
+from typing import List
 from typing import Union
 
 # Third-Party Imports
@@ -28,13 +30,44 @@ def tempdir() -> str:
 @pytest.fixture
 def make_bytes_file(tempdir: str) -> Callable[..., pathlib.Path]:
     """Fixture to make text file."""
-    yield partial(make_file, pathlib.Path(tempdir), mode="wb")
+    yield functools.partial(make_file, pathlib.Path(tempdir), mode="wb")
+
+
+@pytest.fixture
+def make_csv_file(tempdir: str) -> Callable[..., pathlib.Path]:
+    """Fixture to make CSV file."""
+    yield functools.partial(make_csv, pathlib.Path(tempdir))
 
 
 @pytest.fixture
 def make_text_file(tempdir: str) -> Callable[..., pathlib.Path]:
     """Fixture to make text file."""
-    yield partial(make_file, pathlib.Path(tempdir), mode="w")
+    yield functools.partial(make_file, pathlib.Path(tempdir), mode="w")
+
+
+def make_csv(
+    __dir: pathlib.Path, /, filename: str, content: List[list]
+) -> pathlib.Path:
+    """Make CSV.
+
+    Args:
+        __dir: Path of directory.
+        filename: Name of file.
+        content: Content of file.
+
+    """
+    if not isinstance(__dir, pathlib.Path):
+        message = f"expected type 'Path', got {type(__dir)} instead"
+        raise TypeError(message)
+
+    filepath = __dir / filename  # type: pathlib.Path
+    with filepath.open("w") as file:
+        writer = csv.writer(file)
+        writer.writerow(content[0])
+        for row in content[1:]:
+            writer.writerow(row)
+
+    return filepath
 
 
 def make_file(

@@ -1,6 +1,10 @@
 # Development requirements
-coverage
 pylint
+redis
+SQLAlchemy
+
+# Testing requirements
+coverage
 pytest
 pytest-cov
 tox

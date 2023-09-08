@@ -2,10 +2,9 @@
 
 # Standard Library Imports
 from __future__ import annotations
-import importlib
 
 # Third-Party Imports
-redis = importlib.import_module("redis")
+import redis
 
 # Local Imports
 from .abstract_publisher import AbstractPublisher

@@ -10,7 +10,6 @@ Implementation based on 'Architecture Patterns in Python' repository pattern.
 
 # Standard Library Imports
 import abc
-from typing import Deque
 from typing import Generator
 
 # Local Imports
@@ -31,7 +30,7 @@ class AbstractEventfulRepository(AbstractTrackingRepository):
 
     @property
     @abc.abstractmethod
-    def events(self) -> Deque[AbstractEvent]:
+    def events(self) -> MessageQueue:
         """Events."""
         raise NotImplementedError
 

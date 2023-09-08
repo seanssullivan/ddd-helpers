@@ -2,16 +2,13 @@
 
 # Standard Library Imports
 import abc
-import importlib
-import operator
-from typing import Any
 from typing import TYPE_CHECKING
 
 # Local Imports
 from .abstract_repository import AbstractRepository
 
 if TYPE_CHECKING:
-    sqlalchemy = importlib.import_module("sqlalchemy")
+    from sqlalchemy.orm import Session
 
 __all__ = [
     "AbstractSqlAlchemyRepository",
@@ -24,7 +21,7 @@ class AbstractSqlAlchemyRepository(AbstractRepository):
 
     @property
     @abc.abstractmethod
-    def session(self) -> Any:
+    def session(self) -> "Session":
         """SQLAlchemy session."""
         raise NotImplementedError
 
@@ -48,25 +45,23 @@ class SqlAlchemyRepository(AbstractSqlAlchemyRepository):
 
     """
 
-    def __init__(
-        self, session: "sqlalchemy.orm.Session", /, *args, **kwargs
-    ) -> None:
+    def __init__(self, session: "Session", /, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._session = session
 
     @property
-    def session(self) -> "sqlalchemy.orm.Session":
+    def session(self) -> "Session":
         """SQLAlchemy session."""
         return self._session
 
     def close(self) -> None:
         """Close connection to repository."""
-        operator.methodcaller("close")(self.session)
+        self.session.close()
 
     def commit(self) -> None:
         """Commit changes to repository."""
-        operator.methodcaller("commit")(self.session)
+        self.session.commit()
 
     def rollback(self) -> None:
         """Rollback changes to repository."""
-        operator.methodcaller("rollback")(self.session)
+        self.session.rollback()

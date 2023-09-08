@@ -9,10 +9,10 @@ This module defines an abstract base class for models.
 
 # Standard Library Imports
 import abc
-from typing import Deque
+from typing import TYPE_CHECKING
 
-# Local Imports
-from ..messages import AbstractEvent
+if TYPE_CHECKING:
+    from ..queue import MessageQueue
 
 __all__ = [
     "AbstractModel",
@@ -45,7 +45,7 @@ class AbstractDispatcher(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def events(self) -> Deque[AbstractEvent]:
+    def events(self) -> "MessageQueue":
         """Events."""
         raise NotImplementedError
 
