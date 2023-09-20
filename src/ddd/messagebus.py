@@ -40,7 +40,7 @@ from .messages import AbstractMessage
 from .messages import AbstractCommand
 from .messages import AbstractEvent
 from .queue import MessageQueue
-from .unit_of_work import AbstractUnitOfWork
+from .units_of_work import AbstractUnitOfWork
 
 __all__ = ["AbstractMessageBus"]
 

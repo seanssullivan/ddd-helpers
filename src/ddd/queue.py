@@ -182,10 +182,12 @@ class MessageQueue(BaseQueue):
             __iterable: Messages with which to extend queue.
 
         """
+        messages = []
         for item in __iterable:
             raise_for_instance(item, AbstractMessage)
+            messages.append(item)
 
-        super().extend(__iterable)
+        super().extend(messages)
 
     def popleft(self) -> AbstractMessage:
         """Pop message from left side of queue."""

@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 """Abstract models.
 
-This module defines an abstract base class for models.
+This module defines abstract base classes for domain models.
+
+Implementation based on 'Architecture Patterns in Python' domain model pattern.
+
+.. _Architecture Patterns in Python:
+    https://github.com/cosmicpython/code
+
 
 """
 
@@ -22,7 +28,12 @@ __all__ = [
 
 
 class AbstractModel(abc.ABC):
-    """Represents an abstract model."""
+    """Represents an abstract model.
+
+    Models have one responsibility: to be unique. Therefore, subclasses must
+    implement both the `__eq__` and `__hash__` methods.
+
+    """
 
     @abc.abstractmethod
     def __eq__(self, other: object) -> bool:
@@ -33,10 +44,13 @@ class AbstractModel(abc.ABC):
         raise NotImplementedError
 
 
-class AbstractDispatcher(abc.ABC):
-    """Represents an abstract dispatcher.
+class AbstractAggregate(AbstractModel):
+    """Represents an abstract aggregate.
 
-    Dispatchers record events raised by the domain model.
+    The primary purpose of an aggregate is not simply to hold a collection of
+    objects; instead, the purpose of an aggregate is to record events raised
+    by the domain model. In addition, the aggregate encapsulates whatever
+    business logic is involved when adding and removing objects.
 
     Attributes:
         events: Events raised by the domain model.
@@ -46,19 +60,8 @@ class AbstractDispatcher(abc.ABC):
     @property
     @abc.abstractmethod
     def events(self) -> "MessageQueue":
-        """Events."""
+        """Events raised."""
         raise NotImplementedError
-
-
-class AbstractAggregate(AbstractModel, AbstractDispatcher):
-    """Represents an abstract aggregate.
-
-    The primary purpose of an aggregate is not simply to hold a collection of
-    objects; instead, the purpose of an aggregate is to record events raised
-    by the domain model. In addition, the aggregate encapsulates whatever
-    business logic is involved when adding and removing objects.
-
-    """
 
     @abc.abstractmethod
     def __contains__(self, obj: object) -> bool:
@@ -76,7 +79,7 @@ class AbstractAggregate(AbstractModel, AbstractDispatcher):
 
     @abc.abstractmethod
     def get(self, ref: str) -> object:
-        """Retrieve object from aggregate."""
+        """Get object in aggregate."""
         raise NotImplementedError
 
     @abc.abstractmethod

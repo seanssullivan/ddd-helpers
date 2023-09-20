@@ -157,7 +157,9 @@ class CsvRepository(AbstractRepository):
             Whether object can be added.
 
         """
-        return obj[self._index] not in self._objects
+        key = obj[self._index]
+        result = key not in self._objects
+        return result
 
     def get(self, ref: Union[int, str]) -> Optional[object]:
         """Get object from repository.

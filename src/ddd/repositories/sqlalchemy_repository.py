@@ -28,14 +28,14 @@ class AbstractSqlAlchemyRepository(AbstractRepository):
 
     @abc.abstractmethod
     def execute(self, *args, **kwargs) -> Any:
-        """Call the execute method directly on the SQLAlchemy session.
+        """Call the `execute` method directly on the SQLAlchemy session.
 
         Args:
             *args: Positional arguments.
             **kwargs: Keyword arguments.
 
         Returns:
-            Result.
+            Results.
 
         """
         raise NotImplementedError
