@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AbstractModel",
-    "AbstractDispatcher",
     "AbstractAggregate",
 ]
 
