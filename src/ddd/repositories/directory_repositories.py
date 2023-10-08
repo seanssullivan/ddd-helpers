@@ -13,15 +13,15 @@ from typing import Union
 from .abstract_repository import AbstractRepository
 from ..models import File
 
-__all__ = ["FileRepository"]
+__all__ = ["DirectoryRepository"]
 
 
 # Initiate logger.
 log = logging.getLogger(__name__)
 
 
-class AbstractFileRepository(AbstractRepository):
-    """Represents an abstract file repository."""
+class AbstractDirectoryRepository(AbstractRepository):
+    """Represents an abstract directory repository."""
 
     @property
     @abc.abstractmethod
@@ -30,8 +30,8 @@ class AbstractFileRepository(AbstractRepository):
         raise NotImplementedError
 
 
-class FileRepository(AbstractRepository):
-    """Implements a file repository.
+class DirectoryRepository(AbstractRepository):
+    """Implements a directory repository.
 
     This repository reads data from files in a directory.
 
@@ -158,10 +158,7 @@ class FileRepository(AbstractRepository):
         else:
             log.debug(
                 "Found %(file)s in %(dir)s",
-                {
-                    "file": filepath,
-                    "dir": self.directory,
-                },
+                {"file": filepath, "dir": self.directory},
             )
             return filepath
 

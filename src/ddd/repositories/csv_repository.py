@@ -13,13 +13,14 @@ import abc
 import csv
 import logging
 import pathlib
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Union
 
 # Local Imports
-from .abstract_repository import AbstractRepository
+from .file_repository import AbstractFileRepository
 
 __all__ = [
     "AbstractCsvRepository",
@@ -31,20 +32,13 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-class AbstractCsvRepository(AbstractRepository):
+# Constants
+CSV_EXTENSION = ".csv"
+DEFAULT_INDEX = "id"
+
+
+class AbstractCsvRepository(AbstractFileRepository):
     """Represents an abstract CSV repository."""
-
-    @property
-    @abc.abstractmethod
-    def filepath(self) -> pathlib.Path:
-        """Filepath."""
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def objects(self) -> List[object]:
-        """Objects in repository."""
-        raise NotImplementedError
 
     @property
     @abc.abstractmethod
@@ -53,7 +47,7 @@ class AbstractCsvRepository(AbstractRepository):
         raise NotImplementedError
 
 
-class CsvRepository(AbstractRepository):
+class CsvRepository(AbstractCsvRepository):
     """Implements a CSV repository.
 
     This repository reads data from a CSV file.
@@ -63,48 +57,28 @@ class CsvRepository(AbstractRepository):
         index: Name of column to use as index.
 
     Attributes:
+        columns: Columns names.
         filepath: Path to CSV file.
+        objects: Objects in repository.
 
     """
 
     def __init__(
-        self, __filepath: Union[pathlib.Path, str], /, index: str = "id"
+        self,
+        __filepath: Union[pathlib.Path, str],
+        /,
+        index: str = DEFAULT_INDEX,
     ) -> None:
-        if not isinstance(__filepath, (pathlib.Path, str)):
-            expected = "expected type 'Path' or 'str'"
-            actual = f"got {type(__filepath)} instead"
-            message = ", ".join([expected, actual])
-            raise TypeError(message)
-
-        if isinstance(__filepath, str):
-            __filepath = pathlib.Path(__filepath)
-
-        if not __filepath.parent.exists():
-            message = f"{__filepath.parent!s} does not exist"
-            raise FileNotFoundError(message)
-
-        if __filepath.is_dir():
-            message = f"{__filepath!s} is a directory"
-            raise IsADirectoryError(message)
-
-        self._filepath = __filepath
-        log.debug("Set filepath as %s", self._filepath)
+        super().__init__(__filepath)
+        if self.filepath.suffix.lower() != CSV_EXTENSION:
+            message = f"{self.filepath!s} is not a CSV file"
+            raise ValueError(message)
 
         self._index = index
         self._objects = {}  # type: Dict[str, dict]
 
         if self._filepath.exists():
             self._load()
-
-    @property
-    def filepath(self) -> pathlib.Path:
-        """Filepath."""
-        return self._filepath
-
-    @property
-    def objects(self) -> List[dict]:
-        """Objects in repository."""
-        return list(self._objects.values())
 
     @property
     def columns(self) -> List[str]:
@@ -116,6 +90,11 @@ class CsvRepository(AbstractRepository):
             return []
         else:
             return results
+
+    @property
+    def objects(self) -> List[dict]:
+        """Objects in repository."""
+        return list(self._objects.values())
 
     def _load(self) -> None:
         """Load objects from CSV file."""
@@ -207,7 +186,7 @@ class CsvRepository(AbstractRepository):
                 row = self._make_row(obj)
                 writer.writerow(row)
 
-    def _make_row(self, obj: object) -> list:
+    def _make_row(self, obj: object) -> List[Any]:
         """Make row.
 
         Args:

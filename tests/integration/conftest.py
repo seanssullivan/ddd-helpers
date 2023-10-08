@@ -11,6 +11,8 @@ from typing import List
 from typing import Union
 
 # Third-Party Imports
+from openpyxl import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 import pytest
 
 
@@ -45,6 +47,12 @@ def make_text_file(tempdir: str) -> Callable[..., pathlib.Path]:
     yield functools.partial(make_file, pathlib.Path(tempdir), mode="w")
 
 
+@pytest.fixture
+def make_xlsx_file(tempdir: str) -> Callable[..., pathlib.Path]:
+    """Fixture to make xlsx file."""
+    yield functools.partial(make_xlsx, pathlib.Path(tempdir))
+
+
 def make_csv(
     __dir: pathlib.Path, /, filename: str, content: List[list]
 ) -> pathlib.Path:
@@ -54,6 +62,9 @@ def make_csv(
         __dir: Path of directory.
         filename: Name of file.
         content: Content of file.
+
+    Returns:
+        Filepath.
 
     """
     if not isinstance(__dir, pathlib.Path):
@@ -67,6 +78,35 @@ def make_csv(
         for row in content[1:]:
             writer.writerow(row)
 
+    return filepath
+
+
+def make_xlsx(
+    __dir: pathlib.Path, /, filename: str, content: List[list]
+) -> None:
+    """Make xlsx.
+
+    Args:
+        __dir: Path of directory.
+        filename: Name of file.
+        content: Content of file.
+
+    Returns:
+        Filepath.
+
+    """
+    if not isinstance(__dir, pathlib.Path):
+        message = f"expected type 'Path', got {type(__dir)} instead"
+        raise TypeError(message)
+
+    filepath = __dir / filename  # type: pathlib.Path
+    workbook = Workbook()
+    worksheet = workbook.active  # type: Worksheet
+    worksheet.append(content[0])
+    for row in content[1:]:
+        worksheet.append(row)
+
+    workbook.save(filepath)
     return filepath
 
 
@@ -85,6 +125,9 @@ def make_file(
         filename: Name of file.
         content: Content of file.
         mode: Write mode. Default ``w``.
+
+    Returns:
+        Filepath.
 
     """
     if not isinstance(__dir, pathlib.Path):
