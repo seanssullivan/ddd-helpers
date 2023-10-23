@@ -71,9 +71,8 @@ def track_return(__method: FunctionType, /) -> FunctionType:
         set_default_attr(self, "__seen__", set())
 
         result = __method(self, *args, **kwargs)
-        raise_for_builtin(result)
-
         if result is not None:
+            raise_for_builtin(result)
             seen = getattr(self, "__seen__")  # type: set
             seen.add(result)
 
