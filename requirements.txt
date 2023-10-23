@@ -1,4 +1,5 @@
 # Development requirements
+openpyxl
 pylint
 redis
 SQLAlchemy

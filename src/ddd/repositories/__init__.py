@@ -6,9 +6,8 @@ import importlib
 # Local Imports
 from .abstract_repository import *
 from .csv_repository import *
+from .directory_repositories import *
 from .eventful_repository import *
-from .file_repositories import *
-from .tracking_repository import *
 
 try:
     importlib.import_module("sqlalchemy")
@@ -16,3 +15,10 @@ except (ImportError, ModuleNotFoundError):
     pass
 else:
     from .sqlalchemy_repository import *
+
+try:
+    importlib.import_module("openpyxl")
+except (ImportError, ModuleNotFoundError):
+    pass
+else:
+    from .xlsx_repository import *

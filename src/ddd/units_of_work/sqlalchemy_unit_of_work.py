@@ -12,7 +12,6 @@ Based on 'Architecture Patterns in Python' unit-of-work pattern.
 from __future__ import annotations
 from typing import Callable
 from typing import Optional
-from typing import Type
 from typing import TYPE_CHECKING
 
 # Local Imports
