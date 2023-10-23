@@ -69,11 +69,11 @@ class CsvRepository(AbstractCsvRepository):
         /,
         index: str = DEFAULT_INDEX,
     ) -> None:
-        super().__init__(__filepath)
-        if self.filepath.suffix.lower() != CSV_EXTENSION:
-            message = f"{self.filepath!s} is not a CSV file"
+        if __filepath.suffix.lower() != CSV_EXTENSION:
+            message = f"{__filepath!s} is not a CSV file"
             raise ValueError(message)
 
+        super().__init__(__filepath)
         self._index = index
         self._objects = {}  # type: Dict[str, dict]
 
@@ -183,26 +183,31 @@ class CsvRepository(AbstractCsvRepository):
             writer = csv.writer(file)
             writer.writerow(self.columns)
             for obj in self.list():
-                row = self._make_row(obj)
+                row = make_row(obj)
                 writer.writerow(row)
-
-    def _make_row(self, obj: object) -> List[Any]:
-        """Make row.
-
-        Args:
-            obj: Object with which to make row.
-
-        Returns:
-            Row.
-
-        """
-        if not isinstance(obj, dict):
-            message = f"expected type 'dict', got {type(obj)} instead"
-            raise TypeError(message)
-
-        return list(obj.values())
 
     def rollback(self) -> None:
         """Rollback changes to repository."""
         self._objects.clear()
         self._load()
+
+
+# ----------------------------------------------------------------------------
+# Helper Functions
+# ----------------------------------------------------------------------------
+def make_row(obj: object) -> List[Any]:
+    """Make row.
+
+    Args:
+        obj: Object with which to make row.
+
+    Returns:
+        Row.
+
+    """
+    if not isinstance(obj, dict):
+        message = f"expected type 'dict', got {type(obj)} instead"
+        raise TypeError(message)
+
+    result = list(obj.values())
+    return result

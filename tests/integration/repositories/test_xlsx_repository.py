@@ -53,7 +53,7 @@ def test_adds_row_to_xlsx_file(
     repo.add(obj)
     repo.commit()
 
-    workbook = load_workbook(filepath)
+    workbook = load_workbook(filepath, data_only=True, read_only=True)
     worksheet = workbook.active
     result = worksheet["B3"].value
     assert result == "SUCCESS"
@@ -73,7 +73,7 @@ def test_adding_rows_is_idempotent(
     repo.add(obj)
     repo.commit()
 
-    workbook = load_workbook(filepath)
+    workbook = load_workbook(filepath, data_only=True, read_only=True)
     worksheet = workbook.active
     result = worksheet["B3"].value
     assert result == "SUCCESS"

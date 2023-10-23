@@ -1,29 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Tracking Repository.
-
-Implementation based on 'Architecture Patterns in Python' repository pattern.
-
-.. _Architecture Patterns in Python:
-    https://github.com/cosmicpython/code
-
-"""
 
 # Standard Library Imports
 import abc
 import functools
 from types import FunctionType
 from typing import List
-from typing import Set
 from typing import Union
 
-# Local Imports
-from ..models import AbstractAggregate
-from .abstract_repository import AbstractRepository
-
-__all__ = [
-    "AbstractTrackingRepository",
-    "TrackingRepository",
-]
+__all__ = ["TrackerMeta"]
 
 
 # Constants
@@ -33,15 +17,16 @@ LIST_METHOD = "list"
 REMOVE_METHOD = "remove"
 
 
-class Tracker(abc.ABCMeta):
+class TrackerMeta(abc.ABCMeta):
     """Metaclass for tracking child objects."""
 
     def __new__(meta, name: str, bases, attrs: dict) -> type:
         wrapped_attrs = meta.wrap_attributes(attrs)
         return super().__new__(meta, name, bases, wrapped_attrs)
 
-    def __call__(cls, *args, **kwargs) -> AbstractRepository:
+    def __call__(cls, *args, **kwargs) -> object:
         instance = super().__call__(*args, **kwargs)
+        setattr(instance, "__seen__", set())
         return instance
 
     @classmethod
@@ -107,9 +92,11 @@ class Tracker(abc.ABCMeta):
         """
 
         @functools.wraps(method)
-        def wrapper(self: AbstractTrackingRepository, obj: object) -> None:
+        def wrapper(self: object, obj: object) -> None:
             method(self, obj)
-            self.seen.add(obj)
+
+            seen = getattr(self, "__seen__")  # type: set
+            seen.add(obj)
 
         functools.update_wrapper(wrapper, method)
         return wrapper
@@ -127,11 +114,12 @@ class Tracker(abc.ABCMeta):
         """
 
         @functools.wraps(method)
-        def wrapper(
-            self: AbstractTrackingRepository, ref: Union[int, str]
-        ) -> object:
+        def wrapper(self: object, ref: Union[int, str]) -> object:
             result = method(self, ref)
-            self.seen.add(result)
+
+            seen = getattr(self, "__seen__")  # type: set
+            seen.add(result)
+
             return result
 
         functools.update_wrapper(wrapper, method)
@@ -150,9 +138,12 @@ class Tracker(abc.ABCMeta):
         """
 
         @functools.wraps(method)
-        def wrapper(self: AbstractTrackingRepository) -> List[object]:
+        def wrapper(self: object) -> List[object]:
             results = method(self)
-            self.seen.update(results)
+
+            seen = getattr(self, "__seen__")  # type: set
+            seen.update(results)
+
             return results
 
         functools.update_wrapper(wrapper, method)
@@ -171,37 +162,11 @@ class Tracker(abc.ABCMeta):
         """
 
         @functools.wraps(method)
-        def wrapper(self: AbstractTrackingRepository, obj: object) -> None:
+        def wrapper(self: object, obj: object) -> None:
             method(self, obj)
-            self.seen.discard(obj)
+
+            seen = getattr(self, "__seen__")  # type: set
+            seen.discard(obj)
 
         functools.update_wrapper(wrapper, method)
         return wrapper
-
-
-class AbstractTrackingRepository(AbstractRepository, metaclass=Tracker):
-    """Represents an abstract tracking repository."""
-
-    @property
-    @abc.abstractmethod
-    def seen(self) -> Set[AbstractAggregate]:
-        """Objects seen."""
-        raise NotImplementedError
-
-
-class TrackingRepository(AbstractTrackingRepository):
-    """Implements a tracking repository.
-
-    Attributes:
-        seen: Objects seen.
-
-    """
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._seen = set()
-
-    @property
-    def seen(self) -> Set[AbstractAggregate]:
-        """Objects seen."""
-        return self._seen

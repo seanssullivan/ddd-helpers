@@ -8,7 +8,6 @@ from .abstract_repository import *
 from .csv_repository import *
 from .directory_repositories import *
 from .eventful_repository import *
-from .tracking_repository import *
 
 try:
     importlib.import_module("sqlalchemy")

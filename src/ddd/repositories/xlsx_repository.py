@@ -70,11 +70,11 @@ class XlsxRepository(AbstractXlsxRepository):
         index: str = DEFAULT_INDEX,
         sheet_name: Optional[str] = None,
     ) -> None:
-        super().__init__(__filepath)
-        if self.filepath.suffix.lower() != XLSX_EXTENSION:
-            message = f"{self.filepath!s} is not an xlsx file"
+        if __filepath.suffix.lower() != XLSX_EXTENSION:
+            message = f"{__filepath!s} is not an xlsx file"
             raise ValueError(message)
 
+        super().__init__(__filepath)
         self._index = index
         self._objects = collections.ChainMap()
 

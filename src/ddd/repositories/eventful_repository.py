@@ -9,38 +9,31 @@ Implementation based on 'Architecture Patterns in Python' repository pattern.
 """
 
 # Standard Library Imports
-import abc
+from typing import Deque
 from typing import Generator
+from typing import Iterable
+from typing import List
 
 # Local Imports
-from .tracking_repository import AbstractTrackingRepository
-from .tracking_repository import TrackingRepository
+from .abstract_repository import AbstractRepository
 from ..messages import AbstractEvent
-from ..messages import BaseEvent
+from ..metaclasses import SingletonMeta
+from ..metaclasses import TrackerMeta
 from ..queue import MessageQueue
 
-__all__ = [
-    "AbstractEventfulRepository",
-    "EventfulRepository",
-]
+__all__ = ["EventfulRepository"]
 
 
-class AbstractEventfulRepository(AbstractTrackingRepository):
-    """Represents an abstract eventful repository."""
+class RepositoryMeta(SingletonMeta, TrackerMeta):
+    """Implements a repository metaclass.
 
-    @property
-    @abc.abstractmethod
-    def events(self) -> MessageQueue:
-        """Events."""
-        raise NotImplementedError
+    Combines the singleton and tracker metaclasses into a single metaclass
+    for use by repositories.
 
-    @abc.abstractmethod
-    def collect_events(self) -> Generator[AbstractEvent, None, None]:
-        """Collect events."""
-        raise NotImplementedError
+    """
 
 
-class EventfulRepository(TrackingRepository, AbstractEventfulRepository):
+class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
     """Implements an eventful repository.
 
     Attributes:
@@ -57,22 +50,68 @@ class EventfulRepository(TrackingRepository, AbstractEventfulRepository):
         """Events."""
         return self._events
 
-    def collect_events(self) -> Generator[BaseEvent, None, None]:
+    def collect_events(self) -> Generator[AbstractEvent, None, None]:
         """Collect events.
 
         Yields:
             Events.
 
         """
-        self._collect_child_events()
+        self._update_events()
         while self.events:
             yield self.events.popleft()
 
-    def _collect_child_events(self) -> None:
-        """Collect events from child objects."""
-        for obj in self.seen:
-            while getattr(obj, "events", None):
-                event = obj.events.popleft()
-                self.events.append(event)
-
+    def _update_events(self) -> None:
+        """Update events."""
+        events = self._get_child_events()
+        self.events.extend(events)
         self.events.sort()
+
+    def _get_child_events(self) -> List[AbstractEvent]:
+        """Get events from child objects.
+
+        Returns:
+            Events.
+
+        """
+        seen = getattr(self, "__seen__")  # type: set
+        results = collect_events_from_objects(seen)
+        # seen.clear()
+        return results
+
+
+def collect_events_from_objects(objs: Iterable) -> List[AbstractEvent]:
+    """Collect events from objects.
+
+    Args:
+        objs: Objects from which to collect events.
+
+    Returns:
+        Events.
+
+    """
+    results = []
+    for obj in objs:
+        events = collect_events_from_object(obj)
+        results.extend(events)
+
+    return results
+
+
+def collect_events_from_object(obj: object) -> List[AbstractEvent]:
+    """Collect events from object.
+
+    Args:
+        obj: Object from which to collect events.
+
+    Returns:
+        Events.
+
+    """
+    results = []
+    while getattr(obj, "events", None):
+        events = getattr(obj, "events")  # type: Deque[AbstractEvent]
+        event = events.popleft()  # type: AbstractEvent
+        results.append(event)
+
+    return results
