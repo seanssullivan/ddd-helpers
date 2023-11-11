@@ -16,6 +16,7 @@ from typing import List
 
 # Local Imports
 from .abstract_repository import AbstractRepository
+from ..decorators.tracking import SEEN_ATTR
 from ..messages import AbstractEvent
 from ..metaclasses import SingletonMeta
 from ..metaclasses import TrackerMeta
@@ -74,7 +75,7 @@ class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
             Events.
 
         """
-        seen = getattr(self, "__seen__")  # type: set
+        seen = getattr(self, SEEN_ATTR, set())  # type: set
         results = collect_events_from_objects(seen)
         # seen.clear()
         return results

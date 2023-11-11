@@ -2,12 +2,22 @@
 
 # Standard Library Imports
 import functools
-from types import FunctionType
+from types import MethodType
 from typing import Any
+from typing import Sequence
+
+__all__ = [
+    "track_first_positional_argument",
+    "track_multiple_return_values",
+    "track_single_return_value",
+]
+
+# Constants
+SEEN_ATTR = "__seen__"
 
 
-def track_argument(__method: FunctionType, /) -> FunctionType:
-    """Track argument of method.
+def track_first_positional_argument(method: MethodType, /) -> MethodType:
+    """Track first positional argument passed to method.
 
     Args:
         method: Method to track.
@@ -17,12 +27,12 @@ def track_argument(__method: FunctionType, /) -> FunctionType:
 
     """
 
-    @functools.wraps(__method)
-    def wrapper(self, *args, **kwargs) -> Any:
+    @functools.wraps(method)
+    def wrapper(self, obj: object, /, *args, **kwargs) -> Any:
         """Wrapper applied to decorated method.
 
         Args:
-            self: Class of method.
+            obj: Object to track.
             *args: Positional arguments to pass to wrapped method.
             **kwargs: Keyword arguments to pass to wrapped method.
 
@@ -30,22 +40,19 @@ def track_argument(__method: FunctionType, /) -> FunctionType:
             Result of called method.
 
         """
-        set_default_attr(self, "__seen__", set())
+        result = method(self, obj, *args, **kwargs)
 
-        if args:
-            raise_for_builtin(args[0])
-            seen = getattr(self, "__seen__")  # type: set
-            seen.add(args[0])
-
-        result = __method(self, *args, **kwargs)
+        # We only add objects to those seen after the method executes
+        # successfully. We don't want to track objects that raise exceptions.
+        add_seen_object(self, obj)
         return result
 
-    functools.update_wrapper(wrapper, __method)
+    functools.update_wrapper(wrapper, method)
     return wrapper
 
 
-def track_return(__method: FunctionType, /) -> FunctionType:
-    """Track return value of method.
+def track_multiple_return_values(method: MethodType, /) -> MethodType:
+    """Track all values returned from method.
 
     Args:
         method: Method to track.
@@ -55,12 +62,44 @@ def track_return(__method: FunctionType, /) -> FunctionType:
 
     """
 
-    @functools.wraps(__method)
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs) -> Sequence:
+        """Wrapper applied to decorated method.
+
+        Args:
+            *args: Positional arguments to pass to wrapped method.
+            **kwargs: Keyword arguments to pass to wrapped method.
+
+        Returns:
+            Results of called method.
+
+        """
+        results = method(self, *args, **kwargs)
+        if results is not None:
+            update_seen_objects(self, results)
+
+        return results
+
+    functools.update_wrapper(wrapper, method)
+    return wrapper
+
+
+def track_single_return_value(method: MethodType, /) -> MethodType:
+    """Track each value returned from method.
+
+    Args:
+        method: Method to track.
+
+    Returns:
+        Wrapped function.
+
+    """
+
+    @functools.wraps(method)
     def wrapper(self, *args, **kwargs) -> Any:
         """Wrapper applied to decorated method.
 
         Args:
-            self: Class of method.
             *args: Positional arguments to pass to wrapped method.
             **kwargs: Keyword arguments to pass to wrapped method.
 
@@ -68,23 +107,45 @@ def track_return(__method: FunctionType, /) -> FunctionType:
             Result of called method.
 
         """
-        set_default_attr(self, "__seen__", set())
-
-        result = __method(self, *args, **kwargs)
+        result = method(self, *args, **kwargs)
         if result is not None:
-            raise_for_builtin(result)
-            seen = getattr(self, "__seen__")  # type: set
-            seen.add(result)
+            add_seen_object(self, result)
 
         return result
 
-    functools.update_wrapper(wrapper, __method)
+    functools.update_wrapper(wrapper, method)
     return wrapper
 
 
 # ----------------------------------------------------------------------------
 # Helper Functions
 # ----------------------------------------------------------------------------
+def add_seen_object(parent: Any, child: Any) -> None:
+    """Add value to seen objects.
+
+    Args:
+        parent: Parent object.
+        child: Child object seen.
+
+    """
+    set_default_attr(parent, SEEN_ATTR, set())
+    seen = getattr(parent, SEEN_ATTR)  # type: set
+    seen.add(child)
+
+
+def update_seen_objects(parent: Any, children: Sequence) -> None:
+    """Add results to seen objects.
+
+    Args:
+        parent: Parent object.
+        children: Child objects seen.
+
+    """
+    set_default_attr(parent, SEEN_ATTR, set())
+    seen = getattr(parent, SEEN_ATTR)  # type: set
+    seen.update(children)
+
+
 def set_default_attr(obj: object, attr: str, value: Any) -> None:
     """Set default value of attribute on object.
 
@@ -96,32 +157,3 @@ def set_default_attr(obj: object, attr: str, value: Any) -> None:
     """
     if not hasattr(obj, attr):
         setattr(obj, attr, value)
-
-
-def raise_for_builtin(obj: object, /) -> None:
-    """Raise error if object is instance of a builtin class.
-
-    Args:
-        obj: Object.
-
-    Raises:
-        TypeError: when argument is instance of a builtin class.
-
-    """
-    if is_builtin(obj):
-        message = "argument is instance of builtin class"
-        raise TypeError(": ".join([message, type(obj)]))
-
-
-def is_builtin(obj: object, /) -> bool:
-    """Check whether object is an instance of a builtin class.
-
-    Args:
-        obj: Object to check.
-
-    Returns:
-        Whether object is an instance of a builtin class.
-
-    """
-    result = obj.__class__.__module__ == "__builtins__"
-    return result

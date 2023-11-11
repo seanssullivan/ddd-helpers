@@ -3,7 +3,9 @@
 # Standard Library Imports
 from __future__ import annotations
 import abc
+import inspect
 from typing import Dict
+from typing import Union
 
 __all__ = ["SingletonMeta"]
 
@@ -26,11 +28,10 @@ class SingletonMeta(abc.ABCMeta):
     _instances: Dict[str, object] = {}
 
     def __call__(cls, *args, **kwargs) -> object:
-        key = get_hashkey(cls)
+        key = make_key(cls)
 
         if key not in cls._instances:
             instance = super().__call__(*args, **kwargs)
-
             if cls.is_singleton(instance):
                 cls._instances[key] = instance
 
@@ -43,19 +44,20 @@ class SingletonMeta(abc.ABCMeta):
         cls._instances.clear()
 
     @classmethod
-    def discard(cls, subclass: type) -> None:
+    def discard(cls, __subclass: Union[object, type]) -> None:
         """Discard an instance of a subclass.
 
         Args:
-            subclass: Subclass to discard.
+            __subclass: Subclass to discard.
 
         """
-        key = get_hashkey(subclass)
+        subclass = get_class(__subclass)
+        key = make_key(subclass)
         if cls._instances.get(key):
             del cls._instances[key]
 
     @staticmethod
-    def is_singleton(__obj: object, /) -> bool:
+    def is_singleton(__obj: Union[object, type], /) -> bool:
         """Checks whether an object is a singleton.
 
         Args:
@@ -69,29 +71,34 @@ class SingletonMeta(abc.ABCMeta):
         return result
 
 
-def get_hashkey(__cls: type, /) -> str:
-    """Get hash key for class.
+def make_key(__cls: type, /) -> str:
+    """Make a unique key for a class.
 
     Args:
-        __cls: Class for which to get hash key.
+        __cls: Class for which to make key.
 
     Returns:
-        Hash key.
+        Key.
 
     """
-    result = make_hashkey(__cls.__module__, __cls.__name__)
+    result = "%s.%s" % (__cls.__module__, __cls.__name__)
     return result
 
 
-def make_hashkey(*args) -> str:
-    """Generate a hash key.
+def get_class(__class_or_object: Union[object, type], /) -> type:
+    """Get class of object.
 
     Args:
-        *args: Positional arguments.
+        __class_or_object: Class or instance.
 
     Returns:
-        Hash key.
+        Class.
 
     """
-    result = str(hash(args))
+    result = (
+        # Unwrap argument in case class is decorated.
+        inspect.unwrap(__class_or_object).__class__
+        if not inspect.isclass(__class_or_object)
+        else __class_or_object
+    )
     return result
