@@ -2,10 +2,10 @@
 
 # Standard Library Imports
 import abc
+from types import FunctionType
 from types import MethodType
 from typing import Any
 from typing import Callable
-from typing import TypeVar
 
 # Local Imports
 from .. import decorators
@@ -21,16 +21,12 @@ LIST_METHOD = "list"
 REMOVE_METHOD = "remove"
 
 
-# Custom types
-T = TypeVar("T", bound=MethodType)
-
-
 class TrackerMeta(abc.ABCMeta):
     """Metaclass for tracking child objects."""
 
-    def __new__(meta, name: str, bases, attrs: dict) -> type:
-        wrapped_attrs = meta.wrap_attributes(attrs)
-        return super().__new__(meta, name, bases, wrapped_attrs)
+    def __new__(meta, name: str, bases, namespace: dict, **kwargs) -> type:
+        wrapped_attrs = meta.wrap_attributes(namespace)
+        return super().__new__(meta, name, bases, wrapped_attrs, **kwargs)
 
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         instance = super().__call__(*args, **kwargs)
@@ -51,7 +47,7 @@ class TrackerMeta(abc.ABCMeta):
         results = {
             key: (
                 cls.wrap_method(key, value)
-                if isinstance(value, MethodType)
+                if isinstance(value, (FunctionType, MethodType))
                 else value
             )
             for key, value in attrs.items()
@@ -69,7 +65,7 @@ class TrackerMeta(abc.ABCMeta):
             Wrapped method.
 
         """
-        if not isinstance(method, MethodType):
+        if not isinstance(method, (FunctionType, MethodType)):
             message = f"expected method, got type {type(method)} instead"
             raise TypeError(message)
 
