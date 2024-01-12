@@ -54,7 +54,7 @@ class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
     @property
     def seen(self) -> set:
         """Objects seen."""
-        return getattr(self, SEEN_ATTR, set())  # type: set
+        return getattr(self, SEEN_ATTR, set())
 
     def collect_events(self) -> Generator[AbstractEvent, None, None]:
         """Collect events.

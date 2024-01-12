@@ -70,6 +70,9 @@ class XlsxRepository(AbstractXlsxRepository):
         index: str = DEFAULT_INDEX,
         sheet_name: Optional[str] = None,
     ) -> None:
+        if isinstance(__filepath, str):
+            __filepath = pathlib.Path(__filepath)
+
         if __filepath.suffix.lower() != XLSX_EXTENSION:
             message = f"{__filepath!s} is not an xlsx file"
             raise ValueError(message)

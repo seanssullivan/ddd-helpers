@@ -9,3 +9,4 @@ coverage
 pytest
 pytest-cov
 tox
+types-openpyxl

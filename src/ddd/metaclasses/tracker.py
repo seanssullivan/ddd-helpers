@@ -3,6 +3,9 @@
 # Standard Library Imports
 import abc
 from types import MethodType
+from typing import Any
+from typing import Callable
+from typing import TypeVar
 
 # Local Imports
 from .. import decorators
@@ -18,6 +21,10 @@ LIST_METHOD = "list"
 REMOVE_METHOD = "remove"
 
 
+# Custom types
+T = TypeVar("T", bound=MethodType)
+
+
 class TrackerMeta(abc.ABCMeta):
     """Metaclass for tracking child objects."""
 
@@ -25,7 +32,7 @@ class TrackerMeta(abc.ABCMeta):
         wrapped_attrs = meta.wrap_attributes(attrs)
         return super().__new__(meta, name, bases, wrapped_attrs)
 
-    def __call__(cls, *args, **kwargs) -> object:
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         instance = super().__call__(*args, **kwargs)
         setattr(instance, SEEN_ATTR, set())
         return instance
@@ -52,7 +59,7 @@ class TrackerMeta(abc.ABCMeta):
         return results
 
     @classmethod
-    def wrap_method(cls, name: str, method: MethodType) -> MethodType:
+    def wrap_method(cls, name: str, method: Any) -> Callable:
         """Wrap method.
 
         Args:
