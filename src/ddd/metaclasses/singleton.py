@@ -35,9 +35,10 @@ class SingletonMeta(abc.ABCMeta):
             instance = super().__call__(*args, **kwargs)
             if cls.is_singleton(instance):
                 cls._instances[key] = instance
-
-        result = cls._instances[key]
-        return result
+        else:
+            instance = cls._instances[key]
+        
+        return instance
 
     @classmethod
     def clear(cls) -> None:
