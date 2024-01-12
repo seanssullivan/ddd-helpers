@@ -10,6 +10,7 @@ Implementation based on 'Architecture Patterns in Python' repository pattern.
 
 # Standard Library Imports
 import abc
+from typing import Any
 from typing import List
 from typing import Union
 
@@ -20,7 +21,7 @@ class AbstractRepository(abc.ABC):
     """Represents an abstract repository."""
 
     @abc.abstractmethod
-    def add(self, obj: object) -> None:
+    def add(self, obj: Any) -> None:
         """Add object to repository.
 
         Args:
@@ -30,7 +31,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get(self, ref: Union[int, str]) -> object:
+    def get(self, ref: Union[int, str]) -> Any:
         """Get object from repository.
 
         Args:
@@ -43,7 +44,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list(self) -> List[object]:
+    def list(self) -> list:
         """List objects in repository.
 
         Returns:
@@ -53,7 +54,7 @@ class AbstractRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def remove(self, obj: object) -> None:
+    def remove(self, obj: Any) -> None:
         """Remove object from repository.
 
         Args:

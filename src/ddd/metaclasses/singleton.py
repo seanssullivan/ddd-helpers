@@ -4,6 +4,7 @@
 from __future__ import annotations
 import abc
 import inspect
+from typing import Any
 from typing import Dict
 from typing import Union
 
@@ -25,9 +26,9 @@ class SingletonMeta(abc.ABCMeta):
 
     """
 
-    _instances: Dict[str, object] = {}
+    _instances: Dict[str, Any] = {}
 
-    def __call__(cls, *args, **kwargs) -> object:
+    def __call__(cls, *args, **kwargs) -> Any:
         key = make_key(cls)
 
         if key not in cls._instances:
@@ -85,7 +86,7 @@ def make_key(__cls: type, /) -> str:
     return result
 
 
-def get_class(__class_or_object: Union[object, type], /) -> type:
+def get_class(__class_or_object: Any, /) -> type:
     """Get class of object.
 
     Args:

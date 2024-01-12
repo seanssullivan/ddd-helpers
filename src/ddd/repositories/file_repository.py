@@ -5,7 +5,6 @@
 import abc
 import logging
 import pathlib
-from typing import List
 from typing import Union
 
 # Local Imports
@@ -59,6 +58,6 @@ class AbstractFileRepository(AbstractRepository):
 
     @property
     @abc.abstractmethod
-    def objects(self) -> List[object]:
+    def objects(self) -> list:
         """Objects in repository."""
         raise NotImplementedError

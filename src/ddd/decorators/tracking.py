@@ -2,8 +2,10 @@
 
 # Standard Library Imports
 import functools
+from types import FunctionType
 from types import MethodType
 from typing import Any
+from typing import Callable
 from typing import Sequence
 
 __all__ = [
@@ -12,11 +14,12 @@ __all__ = [
     "track_single_return_value",
 ]
 
+
 # Constants
 SEEN_ATTR = "__seen__"
 
 
-def track_first_positional_argument(method: MethodType, /) -> MethodType:
+def track_first_positional_argument(method: Callable, /) -> Callable:
     """Track first positional argument passed to method.
 
     Args:
@@ -25,7 +28,13 @@ def track_first_positional_argument(method: MethodType, /) -> MethodType:
     Returns:
         Wrapped function.
 
+    Raises:
+        TypeError: when argument is not a method.
+
     """
+    if not isinstance(method, (FunctionType, MethodType)):
+        message = f"expected method, got type {type(method)} instead"
+        raise TypeError(message)
 
     @functools.wraps(method)
     def wrapper(self, obj: object, /, *args, **kwargs) -> Any:
@@ -51,7 +60,7 @@ def track_first_positional_argument(method: MethodType, /) -> MethodType:
     return wrapper
 
 
-def track_multiple_return_values(method: MethodType, /) -> MethodType:
+def track_multiple_return_values(method: Callable, /) -> Callable:
     """Track all values returned from method.
 
     Args:
@@ -60,7 +69,13 @@ def track_multiple_return_values(method: MethodType, /) -> MethodType:
     Returns:
         Wrapped function.
 
+    Raises:
+        TypeError: when argument is not a method.
+
     """
+    if not isinstance(method, (FunctionType, MethodType)):
+        message = f"expected method, got type {type(method)} instead"
+        raise TypeError(message)
 
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs) -> Sequence:
@@ -84,7 +99,7 @@ def track_multiple_return_values(method: MethodType, /) -> MethodType:
     return wrapper
 
 
-def track_single_return_value(method: MethodType, /) -> MethodType:
+def track_single_return_value(method: Callable, /) -> Callable:
     """Track each value returned from method.
 
     Args:
@@ -93,7 +108,13 @@ def track_single_return_value(method: MethodType, /) -> MethodType:
     Returns:
         Wrapped function.
 
+    Raises:
+        TypeError: when argument is not a method.
+
     """
+    if not isinstance(method, (FunctionType, MethodType)):
+        message = f"expected method, got type {type(method)} instead"
+        raise TypeError(message)
 
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs) -> Any:

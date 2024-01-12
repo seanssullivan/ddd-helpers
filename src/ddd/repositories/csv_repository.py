@@ -67,15 +67,18 @@ class CsvRepository(AbstractCsvRepository):
         self,
         __filepath: Union[pathlib.Path, str],
         /,
-        index: str = DEFAULT_INDEX,
+        index: Union[int, str] = DEFAULT_INDEX,
     ) -> None:
+        if isinstance(__filepath, str):
+            __filepath = pathlib.Path(__filepath)
+
         if __filepath.suffix.lower() != CSV_EXTENSION:
             message = f"{__filepath!s} is not a CSV file"
             raise ValueError(message)
 
         super().__init__(__filepath)
         self._index = index
-        self._objects = {}  # type: Dict[str, dict]
+        self._objects = {}  # type: Dict[Union[int, str], dict]
 
         if self._filepath.exists():
             self._load()
@@ -115,7 +118,7 @@ class CsvRepository(AbstractCsvRepository):
 
         return results
 
-    def add(self, obj: object) -> None:
+    def add(self, obj: Any) -> None:
         """Add object to repository.
 
         Args:
@@ -126,7 +129,7 @@ class CsvRepository(AbstractCsvRepository):
             key = obj[self._index]
             self._objects[key] = obj
 
-    def can_add(self, obj: object, /) -> bool:
+    def can_add(self, obj: Any, /) -> bool:
         """Check whether object can be added to repository.
 
         Args:
@@ -163,7 +166,7 @@ class CsvRepository(AbstractCsvRepository):
         results = list(self._objects.values())
         return results
 
-    def remove(self, obj: object) -> None:
+    def remove(self, obj: Any) -> None:
         """Remove object from repository.
 
         Args:
