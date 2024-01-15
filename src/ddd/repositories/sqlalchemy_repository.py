@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from .abstract_repository import AbstractRepository
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
+    from sqlalchemy.orm import Session  # type: ignore
 
 __all__ = [
     "AbstractSqlAlchemyRepository",

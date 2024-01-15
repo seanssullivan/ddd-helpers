@@ -11,6 +11,8 @@ Based on 'Architecture Patterns in Python' unit-of-work pattern.
 # Standard Library Imports
 from __future__ import annotations
 import abc
+from typing import Optional
+from typing import Type
 
 __all__ = ["AbstractUnitOfWork"]
 
@@ -23,7 +25,7 @@ class AbstractUnitOfWork(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def __exit__(self, *_) -> None:
+    def __exit__(self, exc: Optional[Type[Exception]], *_) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

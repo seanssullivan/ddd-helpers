@@ -72,11 +72,6 @@ class AbstractAggregate(AbstractModel):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def can_add(self, obj: object) -> bool:
-        """Check whether object can be added to aggregate."""
-        raise NotImplementedError
-
-    @abc.abstractmethod
     def get(self, ref: str) -> object:
         """Get object in aggregate."""
         raise NotImplementedError
