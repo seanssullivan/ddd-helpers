@@ -10,58 +10,58 @@ from ddd.metaclasses import SingletonMeta
 
 
 def test_subclass_is_singleton() -> None:
-    class Test(metaclass=SingletonMeta):
+    class Singleton(metaclass=SingletonMeta):
         __singleton__ = True
 
         def __init__(self) -> None:
             pass
 
-    instance1 = Test()
-    instance2 = Test()
+    instance1 = Singleton()
+    instance2 = Singleton()
     assert instance1 is instance2
 
 
 def test_clears_subclasses() -> None:
-    class Test(metaclass=SingletonMeta):
+    class Singleton(metaclass=SingletonMeta):
         __singleton__ = True
 
         def __init__(self) -> None:
             pass
 
-    instance1 = Test()
+    instance1 = Singleton()
     SingletonMeta.clear()
 
-    instance2 = Test()
+    instance2 = Singleton()
     assert instance1 is not instance2
 
 
 def test_discards_subclasses() -> None:
-    class Test(metaclass=SingletonMeta):
+    class Singleton(metaclass=SingletonMeta):
         __singleton__ = True
 
         def __init__(self) -> None:
             pass
 
-    instance1 = Test()
-    SingletonMeta.discard(Test)
+    instance1 = Singleton()
+    SingletonMeta.discard(Singleton)
 
-    instance2 = Test()
+    instance2 = Singleton()
     assert instance1 is not instance2
 
 
 def test_separate_subclasses_are_different() -> None:
-    class Test1(metaclass=SingletonMeta):
+    class Singleton1(metaclass=SingletonMeta):
         __singleton__ = True
 
         def __init__(self) -> None:
             pass
 
-    class Test2(metaclass=SingletonMeta):
+    class Singleton2(metaclass=SingletonMeta):
         __singleton__ = True
 
         def __init__(self) -> None:
             pass
 
-    instance1 = Test1()
-    instance2 = Test2()
+    instance1 = Singleton1()
+    instance2 = Singleton2()
     assert instance1 is not instance2
