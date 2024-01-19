@@ -97,8 +97,8 @@ class XlsxRepository(AbstractXlsxRepository):
             results = list(keys)
         except StopIteration:
             return []
-        else:
-            return results
+
+        return results
 
     @property
     def objects(self) -> List[dict]:

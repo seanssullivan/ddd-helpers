@@ -91,8 +91,8 @@ class CsvRepository(AbstractCsvRepository):
             results = list(keys)
         except StopIteration:
             return []
-        else:
-            return results
+
+        return results
 
     @property
     def objects(self) -> List[dict]:
@@ -185,7 +185,7 @@ class CsvRepository(AbstractCsvRepository):
         with self._filepath.open("w") as file:
             writer = csv.writer(file)
             writer.writerow(self.columns)
-            for obj in self.list():
+            for obj in self._objects.values():
                 row = make_row(obj)
                 writer.writerow(row)
 
