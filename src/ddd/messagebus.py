@@ -78,7 +78,7 @@ class AbstractMessageBus(abc.ABC):
     def subscribe(
         self, message: Type[AbstractMessage], handler: Callable
     ) -> None:
-        """Subscribe a handler for a Command or Event.
+        """Subscribe a handler for a `Command` or `Event`.
 
         Args:
             message: Message type to which to subscribe.
@@ -132,7 +132,7 @@ class BaseMessageBus(AbstractMessageBus):
     def subscribe(
         self, message: Type[AbstractMessage], handler: Callable
     ) -> None:
-        """Subscribe a handler for a Command or Event.
+        """Subscribe a handler for a `Command` or `Event`.
 
         Args:
             message: Message type to which to subscribe.
@@ -144,7 +144,7 @@ class BaseMessageBus(AbstractMessageBus):
         elif issubclass(message, AbstractEvent):
             self.event_handlers[message].append(handler)
         else:
-            error = f"{type(message)} is not a Command or an Event"
+            error = f"{type(message)} is not a 'Command' or an 'Event'"
             raise TypeError(error)
 
     def handle_message(self, message: AbstractMessage) -> None:
@@ -159,7 +159,7 @@ class BaseMessageBus(AbstractMessageBus):
         elif isinstance(message, AbstractEvent):
             self.handle_event(message)
         else:
-            error = f"{message} was not a Command or an Event"
+            error = f"{message} was not a 'Command' or an 'Event'"
             raise TypeError(error)
 
     def handle_command(self, command: AbstractCommand) -> None:
