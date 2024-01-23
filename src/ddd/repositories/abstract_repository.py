@@ -11,7 +11,6 @@ Implementation based on 'Architecture Patterns in Python' repository pattern.
 # Standard Library Imports
 import abc
 from typing import Any
-from typing import List
 from typing import Union
 
 __all__ = ["AbstractRepository"]
