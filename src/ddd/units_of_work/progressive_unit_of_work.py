@@ -46,6 +46,6 @@ class ProgressiveUnitOfWork(BaseUnitOfWork):
         self._progress_bar.close()
 
     @property
-    def progress_bar(self) -> tqdm:
+    def progress(self) -> tqdm:
         """Progress bar."""
         return self._progress_bar
