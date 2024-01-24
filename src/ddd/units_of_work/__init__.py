@@ -14,10 +14,3 @@ except (ImportError, ModuleNotFoundError):
     pass
 else:
     from .progressive_unit_of_work import *
-
-try:
-    importlib.import_module("sqlalchemy")
-except (ImportError, ModuleNotFoundError):
-    pass
-else:
-    from .sqlalchemy_unit_of_work import *

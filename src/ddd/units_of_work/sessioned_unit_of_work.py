@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""SQLAlchemy Unit of Work.
+"""Sessioned Unit of Work.
 
 Based on 'Architecture Patterns in Python' unit-of-work pattern.
 
@@ -12,44 +12,44 @@ Based on 'Architecture Patterns in Python' unit-of-work pattern.
 from __future__ import annotations
 from typing import Callable
 from typing import Optional
-from typing import TYPE_CHECKING
+from typing import TypeVar
 
 # Local Imports
-from .eventful_unit_of_work import EventfulUnitOfWork
+from .base_unit_of_work import BaseUnitOfWork
 
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Session
 
+# Custom types
+T = TypeVar("T")
 
 # Private attributes
 SESSION_ATTR = "_session"
 
 
-class SQLAlchemyUnitOfWork(EventfulUnitOfWork):
-    """Class implements an SQLAlchemy unit of work.
+class SessionedUnitOfWork(BaseUnitOfWork):
+    """Class implements a sessioned unit of work.
 
     Args:
         *args (optional): Positional arguments.
-        session_factory (optional): Function for creating a database session.
+        session_factory (optional): Function for creating a session.
         **kwargs (optional): Keyword arguments.
 
     Attributes:
-        session: Database session.
+        session: Session.
 
     """
 
     def __init__(
-        self, *args, session_factory: Callable[..., "Session"], **kwargs
+        self, *args, session_factory: Callable[..., T], **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
         self._session_factory = session_factory
 
     @property
-    def session(self) -> Optional["Session"]:
-        """SQLAlchemy session."""
+    def session(self) -> Optional[T]:
+        """Session."""
         return getattr(self, SESSION_ATTR, None)
 
-    def __enter__(self) -> SQLAlchemyUnitOfWork:
+    def __enter__(self) -> SessionedUnitOfWork:
         setattr(self, SESSION_ATTR, self._session_factory())
         super().__enter__()
         return self
@@ -60,12 +60,12 @@ class SQLAlchemyUnitOfWork(EventfulUnitOfWork):
 
     def close(self) -> None:
         """Close session."""
-        self.session.close()
+        getattr(self.session, "close")()
 
     def commit(self) -> None:
         """Commit changes to repository."""
-        self.session.commit()
+        getattr(self.session, "commit")()
 
     def rollback(self) -> None:
         """Rollback changes to repository."""
-        self.session.rollback()
+        getattr(self.session, "rollback")()
