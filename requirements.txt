@@ -3,6 +3,7 @@ openpyxl
 pylint
 redis
 SQLAlchemy
+tqdm
 
 # Testing requirements
 coverage

@@ -21,10 +21,10 @@ __all__ = ["EventfulUnitOfWork"]
 
 
 class EventfulUnitOfWork(BaseUnitOfWork):
-    """Implements an eventful unit of work."""
+    """Class implements an eventful unit of work."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self._events = MessageQueue()
 
     def __enter__(self) -> EventfulUnitOfWork:
