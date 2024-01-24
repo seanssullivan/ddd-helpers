@@ -9,6 +9,13 @@ from .base_unit_of_work import *
 from .eventful_unit_of_work import *
 
 try:
+    importlib.import_module("tqdm")
+except (ImportError, ModuleNotFoundError):
+    pass
+else:
+    from .progressive_unit_of_work import *
+
+try:
     importlib.import_module("sqlalchemy")
 except (ImportError, ModuleNotFoundError):
     pass

@@ -29,15 +29,19 @@ class SQLAlchemyUnitOfWork(EventfulUnitOfWork):
     """Class implements an SQLAlchemy unit of work.
 
     Args:
+        *args (optional): Positional arguments.
         session_factory (optional): Function for creating a database session.
+        **kwargs (optional): Keyword arguments.
 
     Attributes:
         session: Database session.
 
     """
 
-    def __init__(self, session_factory: Callable[..., "Session"], /) -> None:
-        super().__init__()
+    def __init__(
+        self, *args, session_factory: Callable[..., "Session"], **kwargs
+    ) -> None:
+        super().__init__(*args, **kwargs)
         self._session_factory = session_factory
 
     @property
