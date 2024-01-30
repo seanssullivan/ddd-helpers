@@ -21,8 +21,17 @@ class TqdmProgressBar(AbstractProgressBar):
         self,
         desc: Optional[str] = None,
         total: Optional[Union[float, int]] = None,
+        leave: bool = False,
+        miniters: Union[float, int] = 1,
+        **kwargs,
     ) -> None:
-        self._progress_bar = tqdm(desc=desc, total=total)
+        self._progress_bar = tqdm(
+            desc=desc,
+            total=total,
+            leave=leave,
+            miniters=miniters,
+            **kwargs,
+        )
 
     @property
     def current(self) -> int:
