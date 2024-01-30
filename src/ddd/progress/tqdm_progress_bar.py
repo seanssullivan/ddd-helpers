@@ -29,6 +29,21 @@ class TqdmProgressBar(AbstractProgressBar):
         """Current progress."""
         return self._progress_bar.n
 
+    @property
+    def total(self) -> int:
+        """Total progress."""
+        return self._progress_bar.total
+
+    @total.setter
+    def total(self, n: Union[float, int]) -> None:
+        if not isinstance(n, (float, int)):
+            expected = "expected type 'float' or 'int'"
+            actual = f"got {n} instead"
+            message = ", ".join([expected, actual])
+            raise TypeError(message)
+
+        self._progress_bar.total = n
+
     def close(self) -> None:
         """Close progress bar."""
         self._progress_bar.close()
