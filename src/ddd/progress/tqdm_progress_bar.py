@@ -33,6 +33,10 @@ class TqdmProgressBar(AbstractProgressBar):
         """Close progress bar."""
         self._progress_bar.close()
 
+    def refresh(self) -> None:
+        """Refresh progress bar."""
+        self._progress_bar.refresh()
+
     def reset(self, total: Optional[Union[float, int]] = None) -> None:
         """Reset progress bar."""
         self._progress_bar.reset(total)
