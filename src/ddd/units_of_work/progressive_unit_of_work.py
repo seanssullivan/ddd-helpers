@@ -3,12 +3,9 @@
 
 # Standard Library Imports
 from __future__ import annotations
-from typing import Optional
-
-# Third-Party Imports
-from tqdm import tqdm
 
 # Local Imports
+from ..progress import AbstractProgressBar
 from .base_unit_of_work import BaseUnitOfWork
 
 __all__ = ["ProgressiveUnitOfWork"]
@@ -19,22 +16,31 @@ class ProgressiveUnitOfWork(BaseUnitOfWork):
 
     Args:
         *args (optional): Positional arguments.
-        progress_bar (optional): Progress bar. Default ``None``.
+        progress_bar: Progress bar.
         **kwargs (optional): Keyword arguments.
 
     Attributes:
         progress_bar: Progress bar.
+
+    Raises:
+        TypeError: when `progress_bar` parameter is not type 'tqdm'.
 
     """
 
     def __init__(
         self,
         *args,
-        progress_bar: Optional[tqdm] = None,
+        progress_bar: AbstractProgressBar,
         **kwargs,
     ) -> None:
+        if not isinstance(progress_bar, AbstractProgressBar):
+            expected = "expected type 'ProgressBar'"
+            actual = f"got {type(progress_bar)} instead"
+            message = ", ".join([expected, actual])
+            raise TypeError(message)
+
         super().__init__(*args, **kwargs)
-        self._progress_bar = progress_bar or tqdm()
+        self._progress_bar = progress_bar
 
     def __enter__(self) -> ProgressiveUnitOfWork:
         self._progress_bar.reset()
@@ -46,6 +52,6 @@ class ProgressiveUnitOfWork(BaseUnitOfWork):
         self._progress_bar.close()
 
     @property
-    def progress_bar(self) -> tqdm:
+    def progress_bar(self) -> AbstractProgressBar:
         """Progress bar."""
         return self._progress_bar
