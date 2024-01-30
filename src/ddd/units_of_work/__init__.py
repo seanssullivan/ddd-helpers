@@ -7,6 +7,7 @@ import importlib
 from .abstract_unit_of_work import *
 from .base_unit_of_work import *
 from .eventful_unit_of_work import *
+from .sessioned_unit_of_work import *
 
 try:
     importlib.import_module("tqdm")

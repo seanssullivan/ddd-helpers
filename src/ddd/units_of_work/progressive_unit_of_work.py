@@ -52,6 +52,6 @@ class ProgressiveUnitOfWork(BaseUnitOfWork):
         self._progress_bar.close()
 
     @property
-    def progress_bar(self) -> AbstractProgressBar:
+    def progress(self) -> AbstractProgressBar:
         """Progress bar."""
         return self._progress_bar
