@@ -24,6 +24,11 @@ class AbstractProgressBar(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
+    def refresh(self) -> None:
+        """Refresh progress bar."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def reset(self, total: Optional[Union[float, int]] = None) -> None:
         """Reset progress bar."""
         raise NotImplementedError
