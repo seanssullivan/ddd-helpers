@@ -2,6 +2,7 @@
 """Abstract Progress Bar."""
 
 # Standard Library Imports
+from __future__ import annotations
 import abc
 from typing import Optional
 from typing import Union
@@ -16,6 +17,12 @@ class AbstractProgressBar(abc.ABC):
     @abc.abstractmethod
     def current(self) -> int:
         """Current progress."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def total(self) -> int:
+        """Total progress."""
         raise NotImplementedError
 
     @abc.abstractmethod
