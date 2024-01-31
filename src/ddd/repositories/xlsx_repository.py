@@ -154,8 +154,11 @@ class XlsxRepository(AbstractXlsxRepository):
     def _load(self) -> None:
         """Load objects from xlsx file."""
         for obj in self._read_contents():
-            key = obj[self._index]
-            self._objects[key] = obj
+            if obj.get(self._index):
+                key = obj[self._index]
+                self._objects[key] = obj
+            else:
+                log.critical("index column is empty: %s", obj)
 
         self._objects = self._objects.new_child()
 
@@ -168,6 +171,12 @@ class XlsxRepository(AbstractXlsxRepository):
         """
         data = load_rows(self._worksheet)
         results = make_objects(data[1:], data[0])
+
+        if not all(self._index in row for row in results):
+            log.error("index column '%s' not found", self._index)
+            log.debug("available columns: %s", list(results[0].keys()))
+            raise KeyError(self._index)
+
         return results
 
     def add(self, obj: object) -> None:
@@ -285,7 +294,7 @@ def load_rows(__worksheet: Worksheet, /) -> List[dict]:
     return results
 
 
-def make_objects(__rows: List[list], /, columns: list) -> dict:
+def make_objects(__rows: List[list], /, columns: list) -> List[dict]:
     """Make objects.
 
     Args:
