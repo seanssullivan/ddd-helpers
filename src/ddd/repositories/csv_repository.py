@@ -102,8 +102,11 @@ class CsvRepository(AbstractCsvRepository):
     def _load(self) -> None:
         """Load objects from CSV file."""
         for obj in self._read_contents():
-            key = obj[self._index]
-            self._objects[key] = obj
+            if obj.get(self._index):
+                key = obj[self._index]
+                self._objects[key] = obj
+            else:
+                log.critical("index column is empty: %s", obj)
 
     def _read_contents(self) -> List[dict]:
         """Read contents of a CSV file.
@@ -115,6 +118,11 @@ class CsvRepository(AbstractCsvRepository):
         with self._filepath.open() as file:
             reader = csv.DictReader(file)
             results = [row for row in reader]
+
+        if not all(self._index in row for row in results):
+            log.error("index column '%s' not found", self._index)
+            log.debug("available columns: %s", list(results[0].keys()))
+            raise KeyError(self._index)
 
         return results
 
