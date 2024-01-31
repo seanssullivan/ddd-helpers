@@ -42,14 +42,11 @@ class ProgressiveUnitOfWork(BaseUnitOfWork):
         super().__init__(*args, **kwargs)
         self._progress_bar = progress_bar
 
-    def __enter__(self) -> ProgressiveUnitOfWork:
-        self._progress_bar.reset()
-        super().__enter__()
-        return self
-
     def __exit__(self, *args) -> None:
         super().__exit__(*args)
-        self._progress_bar.close()
+
+        if self._progress_bar.leave is False:
+            self._progress_bar.close()
 
     @property
     def progress(self) -> AbstractProgressBar:
