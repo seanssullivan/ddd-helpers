@@ -67,6 +67,7 @@ class CsvRepository(AbstractCsvRepository):
         self,
         __filepath: Union[pathlib.Path, str],
         /,
+        encoding: Optional[str] = None,
         index: Union[int, str] = DEFAULT_INDEX,
     ) -> None:
         if isinstance(__filepath, str):
@@ -77,6 +78,7 @@ class CsvRepository(AbstractCsvRepository):
             raise ValueError(message)
 
         super().__init__(__filepath)
+        self._encoding = encoding
         self._index = index
         self._objects = {}  # type: Dict[Union[int, str], dict]
 
@@ -115,7 +117,7 @@ class CsvRepository(AbstractCsvRepository):
             Contents of CSV file.
 
         """
-        with self._filepath.open() as file:
+        with self._filepath.open(encoding=self._encoding) as file:
             reader = csv.DictReader(file)
             results = [row for row in reader]
 
@@ -190,7 +192,7 @@ class CsvRepository(AbstractCsvRepository):
 
     def _save(self) -> None:
         """Save objects to CSV file."""
-        with self._filepath.open("w") as file:
+        with self._filepath.open("w", encoding=self._encoding) as file:
             writer = csv.writer(file)
             writer.writerow(self.columns)
             for obj in self._objects.values():
