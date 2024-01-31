@@ -39,6 +39,19 @@ class TqdmProgressBar(AbstractProgressBar):
         return self._progress_bar.n
 
     @property
+    def leave(self) -> bool:
+        """Whether progress bar is maintained between iterations."""
+        return self._progress_bar.leave
+
+    @leave.setter
+    def leave(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            message = f"expected type 'bool', got {type(value)} instead"
+            raise TypeError(message)
+
+        self._progress_bar.leave = value
+
+    @property
     def total(self) -> int:
         """Total progress."""
         return self._progress_bar.total

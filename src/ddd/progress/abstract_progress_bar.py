@@ -21,6 +21,12 @@ class AbstractProgressBar(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def leave(self) -> bool:
+        """Whether progress bar is maintained between iterations."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
     def total(self) -> int:
         """Total progress."""
         raise NotImplementedError
