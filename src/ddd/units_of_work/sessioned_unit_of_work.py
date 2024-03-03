@@ -10,6 +10,7 @@ Based on 'Architecture Patterns in Python' unit-of-work pattern.
 
 # Standard Library Imports
 from __future__ import annotations
+from typing import Any
 from typing import Callable
 from typing import Optional
 from typing import TypeVar
@@ -38,14 +39,12 @@ class SessionedUnitOfWork(BaseUnitOfWork):
 
     """
 
-    def __init__(
-        self, *args, session_factory: Callable[..., T], **kwargs
-    ) -> None:
+    def __init__(self, *args, session_factory: Callable, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._session_factory = session_factory
 
     @property
-    def session(self) -> Optional[T]:
+    def session(self) -> Optional[Any]:
         """Session."""
         return getattr(self, SESSION_ATTR, None)
 

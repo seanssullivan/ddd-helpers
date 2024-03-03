@@ -5,7 +5,6 @@ import abc
 from dataclasses import asdict
 import logging
 import json
-import operator
 from typing import Any
 
 # Local Imports
@@ -38,5 +37,4 @@ class AbstractPublisher(abc.ABC):
         log.info("publishing: channel=%s, event=%s", channel, event)
         payload = json.dumps(asdict(event))
 
-        publish_to = operator.methodcaller("publish", channel, payload)
-        publish_to(self.connection)
+        getattr(self.connection, "publish")(channel, payload)

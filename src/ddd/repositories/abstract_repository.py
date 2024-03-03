@@ -13,11 +13,20 @@ import abc
 from typing import Any
 from typing import Union
 
+# Local Imports
+from ..decorators.tracking import SEEN_ATTR
+from ..metaclasses import RepositoryMeta
+
 __all__ = ["AbstractRepository"]
 
 
-class AbstractRepository(abc.ABC):
+class AbstractRepository(abc.ABC, metaclass=RepositoryMeta):
     """Represents an abstract repository."""
+
+    @property
+    def seen(self) -> set:
+        """Objects seen."""
+        return getattr(self, SEEN_ATTR, set())
 
     @abc.abstractmethod
     def add(self, obj: Any) -> None:

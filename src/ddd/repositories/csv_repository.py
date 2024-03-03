@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""CSV Repository.
+"""CSV-Based Repository.
 
 Implementation based on 'Architecture Patterns in Python' repository pattern.
 
@@ -48,7 +48,7 @@ class AbstractCsvRepository(AbstractFileRepository):
 
 
 class CsvRepository(AbstractCsvRepository):
-    """Implements a CSV repository.
+    """Implements a CSV-based repository.
 
     This repository reads data from a CSV file.
 

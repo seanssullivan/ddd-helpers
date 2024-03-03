@@ -7,16 +7,24 @@ from typing import Set
 
 # Third-Party Imports
 from .models import AbstractModel
+from .repositories import AbstractRepository
 from .repositories import EventfulRepository
+from .units_of_work import AbstractUnitOfWork
 from .units_of_work import EventfulUnitOfWork
 
 
 # Constants
-COMMITTED_ATTR = "_committed"
 DEFAULT_KEY = "reference"
 
+# Private Attributes
+CLOSED_ATTR = "_closed"
+COMMITTED_ATTR = "_committed"
+ROLLED_BACK_ATTR = "_rolled_back"
 
-class FakeRepository(EventfulRepository):
+
+class FakeRepository(AbstractRepository):
+    """Implements a fake repository."""
+
     def __init__(
         self,
         objects: List[AbstractModel] = None,
@@ -25,6 +33,24 @@ class FakeRepository(EventfulRepository):
         super().__init__()
         self._objects = set(objects or [])  # type: Set[AbstractModel]
         self._key = key
+
+    @property
+    def closed(self) -> bool:
+        """Whether `close()` method was called."""
+        result = getattr(self, CLOSED_ATTR, False)
+        return result
+
+    @property
+    def committed(self) -> bool:
+        """Whether `commit()` method was called."""
+        result = getattr(self, COMMITTED_ATTR, False)
+        return result
+
+    @property
+    def rolled_back(self) -> bool:
+        """Whether `rollback()` method was called."""
+        result = getattr(self, ROLLED_BACK_ATTR, False)
+        return result
 
     def __contains__(self, obj: AbstractModel) -> bool:
         return obj in self._objects
@@ -57,22 +83,34 @@ class FakeRepository(EventfulRepository):
 
     def commit(self) -> None:
         """Commit changes."""
-        pass
+        setattr(self, COMMITTED_ATTR, True)
 
     def rollback(self) -> None:
         """Rollback changes."""
-        pass
+        setattr(self, ROLLED_BACK_ATTR, True)
 
     def close(self) -> None:
         """Close repository."""
-        pass
+        setattr(self, CLOSED_ATTR, True)
 
 
-class FakeUnitOfWork(EventfulUnitOfWork):
+class FakeEventfulRepository(FakeRepository, EventfulRepository):
+    """Implements a fake eventful repository."""
+
+
+class FakeUnitOfWork(AbstractUnitOfWork):
+    """Implements a fake unit of work."""
+
     @property
     def committed(self) -> bool:
         """Whether `commit()` method was called."""
         result = getattr(self, COMMITTED_ATTR, False)
+        return result
+
+    @property
+    def rolled_back(self) -> bool:
+        """Whether `rollback()` method was called."""
+        result = getattr(self, ROLLED_BACK_ATTR, False)
         return result
 
     def __enter__(self) -> FakeUnitOfWork:
@@ -84,3 +122,8 @@ class FakeUnitOfWork(EventfulUnitOfWork):
 
     def rollback(self) -> None:
         """Rollback changes."""
+        setattr(self, ROLLED_BACK_ATTR, True)
+
+
+class FakeEventfulUnitOfWork(FakeUnitOfWork, EventfulUnitOfWork):
+    """Implements a fake eventful unit of work."""
