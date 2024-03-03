@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Message Bus.
 
-This module defines message-bus classes which dispatch commands
-and events to their respective handlers.
+This module defines message-bus classes which delivers commands and events
+to their respective handlers.
 
 Commands are simple data structures that capture an intent for the system to
 perform a particular action: commands are always matched to a single handler.

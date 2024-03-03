@@ -67,6 +67,7 @@ class CsvRepository(AbstractCsvRepository):
         self,
         __filepath: Union[pathlib.Path, str],
         /,
+        encoding: Optional[str] = None,
         index: Union[int, str] = DEFAULT_INDEX,
     ) -> None:
         if isinstance(__filepath, str):
@@ -77,6 +78,7 @@ class CsvRepository(AbstractCsvRepository):
             raise ValueError(message)
 
         super().__init__(__filepath)
+        self._encoding = encoding
         self._index = index
         self._objects = {}  # type: Dict[Union[int, str], dict]
 
@@ -102,8 +104,11 @@ class CsvRepository(AbstractCsvRepository):
     def _load(self) -> None:
         """Load objects from CSV file."""
         for obj in self._read_contents():
-            key = obj[self._index]
-            self._objects[key] = obj
+            if obj.get(self._index):
+                key = obj[self._index]
+                self._objects[key] = obj
+            else:
+                log.critical("index column is empty: %s", obj)
 
     def _read_contents(self) -> List[dict]:
         """Read contents of a CSV file.
@@ -112,9 +117,14 @@ class CsvRepository(AbstractCsvRepository):
             Contents of CSV file.
 
         """
-        with self._filepath.open() as file:
+        with self._filepath.open(encoding=self._encoding) as file:
             reader = csv.DictReader(file)
             results = [row for row in reader]
+
+        if not all(self._index in row for row in results):
+            log.error("index column '%s' not found", self._index)
+            log.debug("available columns: %s", list(results[0].keys()))
+            raise KeyError(self._index)
 
         return results
 
@@ -182,7 +192,7 @@ class CsvRepository(AbstractCsvRepository):
 
     def _save(self) -> None:
         """Save objects to CSV file."""
-        with self._filepath.open("w") as file:
+        with self._filepath.open("w", encoding=self._encoding) as file:
             writer = csv.writer(file)
             writer.writerow(self.columns)
             for obj in self._objects.values():
