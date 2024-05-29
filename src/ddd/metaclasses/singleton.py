@@ -6,9 +6,15 @@ import abc
 import inspect
 from typing import Any
 from typing import Dict
+from typing import Type
+from typing import TypeVar
 from typing import Union
 
 __all__ = ["SingletonMeta"]
+
+
+# Custom types
+T = TypeVar("T")
 
 
 class SingletonMeta(abc.ABCMeta):
@@ -26,27 +32,27 @@ class SingletonMeta(abc.ABCMeta):
 
     """
 
-    _instances: Dict[str, Any] = {}
+    __instances__: Dict[str, Any] = {}
 
-    def __call__(cls, *args, **kwargs) -> Any:
+    def __call__(cls: Type[T], *args, **kwargs) -> T:
         key = make_key(cls)
 
-        if key not in cls._instances:
+        if key not in SingletonMeta.__instances__:
             instance = super().__call__(*args, **kwargs)
-            if cls.is_singleton(instance):
-                cls._instances[key] = instance
+            if SingletonMeta.is_singleton(instance):
+                SingletonMeta.__instances__[key] = instance
         else:
-            instance = cls._instances[key]
-        
+            instance = SingletonMeta.__instances__[key]
+
         return instance
 
-    @classmethod
-    def clear(cls) -> None:
+    @staticmethod
+    def clear() -> None:
         """Clear all instances of subclasses."""
-        cls._instances.clear()
+        SingletonMeta.__instances__.clear()
 
-    @classmethod
-    def discard(cls, __subclass: Union[object, type]) -> None:
+    @staticmethod
+    def discard(__subclass: Union[object, type]) -> None:
         """Discard an instance of a subclass.
 
         Args:
@@ -55,8 +61,8 @@ class SingletonMeta(abc.ABCMeta):
         """
         subclass = get_class(__subclass)
         key = make_key(subclass)
-        if cls._instances.get(key):
-            del cls._instances[key]
+        if SingletonMeta.__instances__.get(key):
+            del SingletonMeta.__instances__[key]
 
     @staticmethod
     def is_singleton(__obj: Union[object, type], /) -> bool:
