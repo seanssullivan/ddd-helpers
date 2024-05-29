@@ -16,25 +16,13 @@ from typing import List
 
 # Local Imports
 from .abstract_repository import AbstractRepository
-from ..decorators.tracking import SEEN_ATTR
 from ..messages import AbstractEvent
-from ..metaclasses import SingletonMeta
-from ..metaclasses import TrackerMeta
 from ..queue import MessageQueue
 
 __all__ = ["EventfulRepository"]
 
 
-class RepositoryMeta(SingletonMeta, TrackerMeta):
-    """Implements a repository metaclass.
-
-    Combines the singleton and tracker metaclasses into a single metaclass
-    for use by repositories.
-
-    """
-
-
-class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
+class EventfulRepository(AbstractRepository):
     """Implements an eventful repository.
 
     Attributes:
@@ -50,11 +38,6 @@ class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
     def events(self) -> MessageQueue:
         """Events."""
         return self._events
-
-    @property
-    def seen(self) -> set:
-        """Objects seen."""
-        return getattr(self, SEEN_ATTR, set())
 
     def collect_events(self) -> Generator[AbstractEvent, None, None]:
         """Collect events.
@@ -81,10 +64,12 @@ class EventfulRepository(AbstractRepository, metaclass=RepositoryMeta):
 
         """
         results = collect_events_from_objects(self.seen)
-        # seen.clear()
         return results
 
 
+# ----------------------------------------------------------------------------
+# Helper Functions
+# ----------------------------------------------------------------------------
 def collect_events_from_objects(objs: Iterable) -> List[AbstractEvent]:
     """Collect events from objects.
 
