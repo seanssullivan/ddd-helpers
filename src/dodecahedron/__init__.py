@@ -14,4 +14,4 @@ from .units_of_work import *
 
 
 __version__ = "0.0"
-__release__ = __version__ + ".18"
+__release__ = __version__ + ".19"
