@@ -14,8 +14,8 @@ from typing import Any
 from typing import Union
 
 # Local Imports
-from ..decorators.tracking import SEEN_ATTR
 from ..metaclasses import RepositoryMeta
+from ..metaclasses.tracker import SEEN_ATTR
 
 __all__ = ["AbstractRepository"]
 

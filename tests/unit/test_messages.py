@@ -15,7 +15,6 @@ from dodecahedron.messages import BaseCommand
 from dodecahedron.messages import BaseEvent
 from dodecahedron.messages import BaseMessage
 from dodecahedron.messages.message import CREATED_AT
-from .. import factories
 
 
 @pytest.mark.parametrize("message", [BaseMessage, BaseCommand, BaseEvent])
