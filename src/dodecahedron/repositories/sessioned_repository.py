@@ -2,8 +2,8 @@
 
 # Standard Library Imports
 import abc
-from types import MethodType
 from typing import Any
+from types import MethodType
 
 # Local Imports
 from .abstract_repository import AbstractRepository
