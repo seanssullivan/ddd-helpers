@@ -202,10 +202,6 @@ class BaseFileWrapper(AbstractWrapper):
             message = f"expected type 'str', got {type(encoding)} instead"
             raise TypeError(message)
 
-        if not filepath.exists():
-            message = f"{filepath!s} does not exist"
-            raise FileNotFoundError(message)
-
         if filepath.is_dir():
             message = f"{filepath!s} is a directory"
             raise IsADirectoryError(message)
@@ -243,10 +239,18 @@ class BaseFileWrapper(AbstractWrapper):
         Returns:
             File content.
 
+        Raises:
+            ValueError: when `mode` is not ``r`` or ``rb``.
+            FileNotFoundError: when file does not exist.
+
         """
         if mode not in ("r", "rb"):
             message = f"mode must be either 'r' or 'rb', not {mode}"
             raise ValueError(message)
+
+        if not self.filepath.exists():
+            message = f"{self.filepath!s} does not exist"
+            raise FileNotFoundError(message)
 
         with self.filepath.open(mode, encoding=self.encoding) as file:
             return file.read()
@@ -254,7 +258,7 @@ class BaseFileWrapper(AbstractWrapper):
     def write(
         self, data: Union[bytes, str], *, mode: Literal["w", "wb"] = "w"
     ) -> None:
-        """Write data to file in directory.
+        """Write data to file.
 
         Args:
             data: Data to write to file.
