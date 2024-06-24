@@ -11,7 +11,7 @@ from typing import Callable
 # import pytest
 
 # Local Imports
-from ddd.repositories import CsvRepository
+from dodecahedron.repositories import CsvRepository
 
 
 def test_saves_a_csv_file(tempdir: str) -> None:

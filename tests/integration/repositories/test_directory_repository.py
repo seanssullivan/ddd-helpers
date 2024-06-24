@@ -11,13 +11,13 @@ from typing import Callable
 # import pytest
 
 # Local Imports
-from ddd.models import File
-from ddd.repositories import DirectoryRepository
+from dodecahedron.models.file_model import File
+from dodecahedron.repositories import DirectoryBasedRepository
 
 
 def test_saves_a_text_file(tempdir: str) -> None:
     temppath = pathlib.Path(tempdir)
-    repo = DirectoryRepository(temppath)
+    repo = DirectoryBasedRepository(temppath)
 
     file = File("test.txt", "success")
     repo.add(file)
@@ -30,7 +30,7 @@ def test_retrieves_a_text_file(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath = make_text_file("test.txt", "success")
-    repo = DirectoryRepository(filepath.parent)
+    repo = DirectoryBasedRepository(filepath.parent)
     result = repo.get("test")
 
     expected = File("test.txt", "success")
@@ -41,7 +41,7 @@ def test_returns_none_when_file_not_found(
     make_text_file: Callable[..., pathlib.Path]
 ) -> None:
     filepath = make_text_file("sample.txt", "test")
-    repo = DirectoryRepository(filepath.parent)
+    repo = DirectoryBasedRepository(filepath.parent)
     result = repo.get("test")
     assert not result
 
@@ -52,7 +52,7 @@ def test_returns_a_list_of_filenames(
     filepath1 = make_text_file("test1.txt", "one")
     filepath2 = make_text_file("test2.txt", "two")
     filepath3 = make_text_file("test3.txt", "three")
-    repo = DirectoryRepository(filepath1.parent)
+    repo = DirectoryBasedRepository(filepath1.parent)
 
     results = repo.search_filenames("*test*")
 

@@ -13,7 +13,7 @@ from openpyxl import load_workbook
 # import pytest
 
 # Local Imports
-from ddd.repositories import XlsxRepository
+from dodecahedron.repositories import XlsxRepository
 
 
 def test_saves_an_xlsx_file(tempdir: str) -> None:
