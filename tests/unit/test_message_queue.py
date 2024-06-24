@@ -6,8 +6,9 @@
 import pytest
 
 # Local Imports
-from ddd.messages import BaseMessage
-from ddd.queue import MessageQueue
+from dodecahedron.messages import BaseMessage
+from dodecahedron.queue import MessageQueue
+from .. import factories
 
 
 def test_instantiates_message_queue_without_arguments() -> None:
@@ -18,7 +19,7 @@ def test_instantiates_message_queue_without_arguments() -> None:
 
 def test_instantiates_message_queue_with_iterable() -> None:
     """Tests that a queue can be instantiated with messages."""
-    result = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    result = MessageQueue(factories.make_messages(3))
     assert isinstance(result, MessageQueue)
 
 
@@ -36,20 +37,21 @@ def test_raises_error_when_argument_not_messages() -> None:
 
 def test_sorts_messages_when_instantiated() -> None:
     """Tests that messages are always sorted after instantiation."""
-    message1, message2, message3 = BaseMessage(), BaseMessage(), BaseMessage()
+    message1, message2, message3 = factories.make_messages(3, delay=1e-6)
+
     queue = MessageQueue([message3, message2, message1])
     assert list(queue) == [message1, message2, message3]
 
 
 def test_returns_length_of_queue() -> None:
     """Tests that `len()` returns the number of messages."""
-    queue = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    queue = MessageQueue(factories.make_messages(3))
     assert len(queue) == 3
 
 
 def test_returns_next_message_in_queue() -> None:
     """Tests that `next()` returns the next message in queue."""
-    message1, message2, message3 = BaseMessage(), BaseMessage(), BaseMessage()
+    message1, message2, message3 = factories.make_messages(3)
     queue = MessageQueue([message1, message2, message3])
     assert next(queue) == message1
 
@@ -64,7 +66,7 @@ def test_raises_error_when_empty() -> None:
 
 def test_appends_to_queue() -> None:
     """Tests that a message can be appended to the queue."""
-    queue = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    queue = MessageQueue(factories.make_messages(3))
     assert len(queue) == 3
 
     queue.append(BaseMessage())
@@ -73,7 +75,7 @@ def test_appends_to_queue() -> None:
 
 def test_sorts_queue_after_appending_message() -> None:
     """Tests that the queue remains sorted after appending a message."""
-    message1, message2, message3 = BaseMessage(), BaseMessage(), BaseMessage()
+    message1, message2, message3 = factories.make_messages(3)
     queue = MessageQueue([message2, message3])
     queue.append(message1)
     assert list(queue) == [message1, message2, message3]
@@ -90,7 +92,8 @@ def test_extends_queue() -> None:
 
 def test_sorts_queue_after_extending() -> None:
     """Tests that the queue remains sorted after it is extended."""
-    message1, message2, message3 = BaseMessage(), BaseMessage(), BaseMessage()
+    message1, message2, message3 = factories.make_messages(3, delay=1e-6)
+
     queue = MessageQueue([message3])
     queue.extend([message2, message1])
     assert list(queue) == [message1, message2, message3]
@@ -98,7 +101,7 @@ def test_sorts_queue_after_extending() -> None:
 
 def test_returns_true_when_queue_contains_messages() -> None:
     """Tests that queues containing messages are truthy."""
-    result = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    result = MessageQueue(factories.make_messages(3))
     assert result
 
 
@@ -110,7 +113,7 @@ def test_returns_false_when_queue_is_empty() -> None:
 
 def test_loops_over_queue_until_empty() -> None:
     """Tests that message queue can used in a while loop."""
-    queue = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    queue = MessageQueue(factories.make_messages(3))
 
     count = 0
     while queue:
@@ -123,7 +126,7 @@ def test_loops_over_queue_until_empty() -> None:
 
 def test_clears_queue() -> None:
     """Tests that `clear()` method empties a message queue."""
-    queue = MessageQueue([BaseMessage(), BaseMessage(), BaseMessage()])
+    queue = MessageQueue(factories.make_messages(3))
     assert len(queue) == 3
 
     queue.clear()
