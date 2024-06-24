@@ -11,7 +11,7 @@ from typing import Optional
 
 # Local Imports
 from dodecahedron.metaclasses import TrackerMeta
-from dodecahedron.decorators.tracking import SEEN_ATTR
+from dodecahedron.metaclasses.tracker import SEEN_ATTR
 
 
 class SampleTracker(metaclass=TrackerMeta):

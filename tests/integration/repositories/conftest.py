@@ -7,6 +7,7 @@ import pathlib
 import shutil
 import tempfile
 from typing import Callable
+from typing import Generator
 from typing import List
 from typing import Union
 
@@ -17,7 +18,7 @@ import pytest
 
 
 @pytest.fixture
-def tempdir() -> str:
+def tempdir() -> Generator[str, None, None]:
     """Fixture for making a temporary directory.
 
     Returns:
@@ -30,25 +31,33 @@ def tempdir() -> str:
 
 
 @pytest.fixture
-def make_bytes_file(tempdir: str) -> Callable[..., pathlib.Path]:
+def make_bytes_file(
+    tempdir: str,
+) -> Generator[Callable[..., pathlib.Path], None, None]:
     """Fixture to make text file."""
     yield functools.partial(make_file, pathlib.Path(tempdir), mode="wb")
 
 
 @pytest.fixture
-def make_csv_file(tempdir: str) -> Callable[..., pathlib.Path]:
+def make_csv_file(
+    tempdir: str,
+) -> Generator[Callable[..., pathlib.Path], None, None]:
     """Fixture to make CSV file."""
     yield functools.partial(make_csv, pathlib.Path(tempdir))
 
 
 @pytest.fixture
-def make_text_file(tempdir: str) -> Callable[..., pathlib.Path]:
+def make_text_file(
+    tempdir: str,
+) -> Generator[Callable[..., pathlib.Path], None, None]:
     """Fixture to make text file."""
     yield functools.partial(make_file, pathlib.Path(tempdir), mode="w")
 
 
 @pytest.fixture
-def make_xlsx_file(tempdir: str) -> Callable[..., pathlib.Path]:
+def make_xlsx_file(
+    tempdir: str,
+) -> Generator[Callable[..., pathlib.Path], None, None]:
     """Fixture to make xlsx file."""
     yield functools.partial(make_xlsx, pathlib.Path(tempdir))
 
