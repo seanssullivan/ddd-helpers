@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""DataFrame Loaders."""
+"""DataFrame Wrappers."""
 
 # Standard Library Imports
 import logging
@@ -15,8 +15,8 @@ from typing import Union
 import pandas as pd
 
 # Local Imports
-from .base_fileloader import FileLoader
-from ...domain import errors
+from .base_wrappers import BaseFileWrapper
+from .base_wrappers import DEFAULT_ENCODING
 
 __all__ = [
     "CsvLoader",
@@ -26,14 +26,14 @@ __all__ = [
 
 
 # Initiate logger.
-log = logging.getLogger(__name__)
+log = logging.getLogger("dodecahedron")
 
 # Constants
 DEFAULT_ENCODING = "utf-8"
 DEFAULT_SEPARATOR = ","
 
 
-class CsvLoader(FileLoader):
+class CsvLoader(BaseFileWrapper):
     """Implements a CSV loader.
 
     Args:
@@ -110,7 +110,7 @@ class CsvLoader(FileLoader):
         return data
 
 
-class ExcelLoader(FileLoader):
+class ExcelLoader(BaseFileWrapper):
     """Implements an Excel loader.
 
     Args:
@@ -285,26 +285,4 @@ def handle_missing_columns(error: Exception) -> None:
         if match
         else "columns not found"
     )
-    raise errors.MissingColumns(message) from error
-
-
-def remap_dataframe_columns(
-    data: pd.DataFrame, mapper: Dict[str, dict]
-) -> pd.DataFrame:
-    """Remap column names.
-
-    Args:
-        data: Data for which to remap column names.
-
-    Returns:
-        Remapped data.
-
-    """
-    result = data.rename(
-        columns={
-            key: value["map_to"]
-            for key, value in mapper.items()
-            if value.get("map_to") is not None
-        },
-    )
-    return result
+    raise ValueError(message) from error

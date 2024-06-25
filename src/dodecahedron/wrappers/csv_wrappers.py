@@ -27,6 +27,7 @@ T = TypeVar("T")
 
 # Constants
 CSV_EXTENSION = ".csv"
+DEFAULT_DELIMITER = ","
 
 
 class CsvFileWrapper(BaseFileWrapper):
@@ -34,11 +35,13 @@ class CsvFileWrapper(BaseFileWrapper):
 
     Args:
         filepath: Path to CSV file.
+        columns (optional): Columns. Default ``None``.
+        delimiter (optional): Delimiter. Default ``,``.
         encoding (optional): File encoding. Default `utf-8`.
-        index: Name of column to use as index.
 
     Attributes:
         columns: Columns.
+        delimiter: Delimiter.
         filepath: Path to CSV file.
         encoding: File encoding.
 
@@ -52,6 +55,7 @@ class CsvFileWrapper(BaseFileWrapper):
         filepath: pathlib.Path,
         /,
         columns: Optional[List[str]] = None,
+        delimiter: str = DEFAULT_DELIMITER,
         encoding: str = DEFAULT_ENCODING,
     ) -> None:
         if filepath.suffix.lower() != CSV_EXTENSION:
@@ -60,13 +64,14 @@ class CsvFileWrapper(BaseFileWrapper):
 
         super().__init__(filepath, encoding)
         self._columns = columns
+        self._delimiter = delimiter
 
     @property
     def columns(self) -> Optional[List[str]]:
         """Column names."""
         return self._columns
 
-    def read(self, dtype: Type[T] = dict) -> List[T]:
+    def read(self, *, dtype: Type[T] = dict) -> List[T]:
         """Read data from CSV file.
 
         Args:
@@ -92,11 +97,15 @@ class CsvFileWrapper(BaseFileWrapper):
 
         """
         with self._filepath.open(encoding=self._encoding) as file:
-            reader = csv.DictReader(file)
+            reader = csv.DictReader(
+                file,
+                self._columns,
+                delimiter=self._delimiter,
+            )
             results = [row for row in reader]
 
         if not self._columns:
-            self._columns = get_columns(results)
+            self._columns = [key for key in results[0].keys()]
 
         return results
 
@@ -108,7 +117,7 @@ class CsvFileWrapper(BaseFileWrapper):
 
         """
         with self._filepath.open(encoding=self._encoding) as file:
-            reader = csv.reader(file)
+            reader = csv.reader(file, delimiter=self._delimiter)
             rows = [row for row in reader]
             columns, results = rows[0], rows[1:]
 
@@ -154,7 +163,11 @@ class CsvFileWrapper(BaseFileWrapper):
         with self._filepath.open(
             "w", encoding=self._encoding, newline=""
         ) as file:
-            writer = csv.DictWriter(file, fieldnames=self.columns)
+            writer = csv.DictWriter(
+                file,
+                fieldnames=self.columns,
+                delimiter=self._delimiter,
+            )
 
             writer.writeheader()
             for item in data:
@@ -170,24 +183,7 @@ class CsvFileWrapper(BaseFileWrapper):
         with self._filepath.open(
             "w", encoding=self._encoding, newline=""
         ) as file:
-            writer = csv.writer(file)
+            writer = csv.writer(file, delimiter=self._delimiter)
             writer.writerow(self.columns)
             for row in data:
                 writer.writerow(row)
-
-
-# ----------------------------------------------------------------------------
-# Helper Functions
-# ----------------------------------------------------------------------------
-def get_columns(data: List[dict]) -> List[str]:
-    """Get columns from data.
-
-    Args:
-        data: Data for which to get columns.
-
-    Returns:
-        Columns.
-
-    """
-    results = [key for key in data[0].keys()]
-    return results

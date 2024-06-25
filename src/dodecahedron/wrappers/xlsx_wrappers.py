@@ -5,6 +5,7 @@
 import logging
 import pathlib
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Type
@@ -17,7 +18,6 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 # Local Imports
 from .base_wrappers import BaseFileWrapper
-from .base_wrappers import DEFAULT_ENCODING
 
 
 # Initiate logger.
@@ -35,12 +35,12 @@ class XlsxFileWrapper(BaseFileWrapper):
 
     Args:
         filepath: Path to xlsx file.
-        sheet_name (optional): Name of sheet in workbook. Default ``None``.
+        columns (optional): Columns. Default ``None``.
+        sheet (optional): Name of sheet in workbook. Default ``None``.
 
     Attributes:
-    columns: Columns.
+        columns: Columns.
         filepath: Path to xlsx file.
-        encoding: File encoding.
 
     Raises:
         ValueError: when `filepath` is not a xlsx file.
@@ -52,13 +52,12 @@ class XlsxFileWrapper(BaseFileWrapper):
         filepath: pathlib.Path,
         /,
         columns: Optional[List[str]] = None,
-        encoding: str = DEFAULT_ENCODING,
     ) -> None:
         if filepath.suffix.lower() != XLSX_EXTENSION:
             message = f"{filepath!s} is not a xlsx file"
             raise ValueError(message)
 
-        super().__init__(filepath, encoding)
+        super().__init__(filepath)
         self._columns = columns
 
     @property
@@ -66,16 +65,82 @@ class XlsxFileWrapper(BaseFileWrapper):
         """Column names."""
         return self._columns
 
-    def read(self, dtype: Type[T] = dict) -> List[T]:
+    def read(
+        self,
+        sheet: Optional[str] = None,
+        *,
+        dtype: Type[T] = dict,
+    ) -> List[T]:
         """Read data from xlsx file.
 
         Args:
+            sheet (optional): Name of worksheet. Default ``None``.
             dtype (optional): Data type of returned data. Default ``dict``.
 
         Returns:
             Data.
 
         """
+        if dtype is dict:
+            return self._read_each_row_as_dict(sheet)
+
+        if dtype is list:
+            return self._read_each_row_as_list(sheet)
+
+        raise NotImplementedError
+
+    def _read_each_row_as_dict(
+        self, sheet: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Read data from CSV file as list of dictionaries.
+
+        Args:
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        Returns:
+            Data.
+
+        """
+        rows = self._read_rows(sheet)
+        columns, records = rows[0], rows[1:]
+
+        if not self._columns:
+            self._columns = columns
+
+        results = [
+            {columns[idx]: value for idx, value in enumerate(record)}
+            for record in records
+        ]
+        return results
+
+    def _read_each_row_as_list(
+        self, sheet: Optional[str] = None
+    ) -> List[list]:
+        """Read data from CSV file as list of lists.
+
+        Args:
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        Returns:
+            Data.
+
+        """
+        results = self._read_rows(sheet)
+        return results
+
+    def _read_rows(self, sheet: Optional[str] = None) -> List[list]:
+        """Read rows from workbook.
+
+        Args:
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        Returns:
+            Rows.
+
+        """
+        worksheet = self._load_worksheet(name=sheet)
+        results = [row for row in worksheet.iter_rows(values_only=True) if row]
+        return results
 
     def _load_worksheet(self, name: Optional[str] = None) -> Worksheet:
         """Get worksheet.
@@ -91,6 +156,71 @@ class XlsxFileWrapper(BaseFileWrapper):
         result = workbook[name] if name is not None else workbook.active
         return result
 
+    def write(self, data: list, sheet: Optional[str] = None) -> None:
+        """Write data to xlsx file.
+
+        Args:
+            data: Data to write to file.
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        """
+        if not isinstance(data, list):
+            message = f"expected type 'list', got {type(data)} instead"
+            raise TypeError(message)
+
+        if all(isinstance(_, dict) for _ in data):
+            self._write_each_row_from_dict(data, sheet)
+
+        if all(isinstance(_, list) for _ in data):
+            self._write_each_row_from_list(data, sheet)
+
+        raise NotImplementedError
+
+    def _write_each_row_from_dict(
+        self, data: List[dict], sheet: Optional[str] = None
+    ) -> None:
+        """Write data to xlsx file from list of dictionaries.
+
+        Args:
+            data: Data to write to xlsx file.
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        """
+        columns = [key for key in data[0].keys()]
+        rows = [list(item.values()) for item in data]
+        self._write_rows([columns, *rows], sheet)
+
+    def _write_each_row_from_list(
+        self, data: List[list], sheet: Optional[str] = None
+    ) -> None:
+        """Write data to xlsx file from list of lists.
+
+        Args:
+            data: Data to write to xlsx file.
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        """
+        self._write_rows(data, sheet)
+
+    def _write_rows(
+        self, rows: list, sheet: Optional[str] = None
+    ) -> List[list]:
+        """Write rows to workbook.
+
+        Args:
+            sheet (optional): Name of worksheet. Default ``None``.
+
+        Returns:
+            Rows.
+
+        """
+        workbook = self._load_workbook()
+        worksheet = make_worksheet(workbook, sheet)
+        for row in rows:
+            worksheet.append(row)
+
+        workbook.save(self.filepath)
+
     def _load_workbook(self) -> Workbook:
         """Load workbook.
 
@@ -101,107 +231,26 @@ class XlsxFileWrapper(BaseFileWrapper):
         result = load_workbook(self.filepath)
         return result
 
-    def _load(self) -> None:
-        """Load objects from xlsx file."""
-        for obj in self._read_contents():
-            if obj.get(self._index):
-                key = obj[self._index]
-                self._objects[key] = obj
-            else:
-                log.critical("index column is empty: %s", obj)
-
-        self._objects = self._objects.new_child()
-
-    def _read_contents(self) -> List[dict]:
-        """Read contents of an xlsx file.
-
-        Returns:
-            Contents of xlsx file.
-
-        """
-        data = load_rows(self._worksheet)
-        results = make_objects(data[1:], data[0])
-
-        if not all(self._index in row for row in results):
-            log.error("index column '%s' not found", self._index)
-            log.debug("available columns: %s", list(results[0].keys()))
-            raise KeyError(self._index)
-
-        return results
-
-    def _update_worksheet(self) -> None:
-        """Update worksheet."""
-        recent_objects = self._objects.maps[0]
-        for obj in list(recent_objects.values()):
-            row = self._make_row(obj)
-            self._worksheet.append(row)
-
-        self._objects = self._objects.new_child()
-
-    def _make_row(self, obj: object) -> List[Any]:
-        """Make row.
-
-        Args:
-            obj: Object with which to make row.
-
-        Returns:
-            Row.
-
-        """
-        if not isinstance(obj, dict):
-            message = f"expected type 'dict', got {type(obj)} instead"
-            raise TypeError(message)
-
-        result = list(obj.values())
-        return result
-
-    def _save_file(self) -> None:
-        """Save objects to xlsx file."""
-        self._workbook.save(self.filepath)
-
 
 # ----------------------------------------------------------------------------
-# Helper Functions
+# Helpers
 # ----------------------------------------------------------------------------
-def load_rows(__worksheet: Worksheet, /) -> List[dict]:
-    """Load rows from workbook.
+def make_worksheet(
+    workbook: Workbook, name: Optional[str] = None
+) -> Worksheet:
+    """Make worksheet.
 
     Args:
-        __worksheet: Workbook from which to load rows.
+        workbook: Workbook.
+        name (optional): Name of worksheet. Default ``None``.
 
     Returns:
-        Rows.
+        Worksheet.
 
     """
-    results = [r for r in __worksheet.iter_rows(values_only=True) if r]
-    return results
-
-
-def make_objects(__rows: List[list], /, columns: list) -> List[dict]:
-    """Make objects.
-
-    Args:
-        __rows: Rows from which to make objects.
-        columns: Column names to use as keys.
-
-    Returns:
-        Objects.
-
-    """
-    results = [make_object(row, columns) for row in __rows]
-    return results
-
-
-def make_object(__row: list, /, columns: list) -> dict:
-    """Make object.
-
-    Args:
-        __row: Row from which to make object.
-        columns: Column names to use as keys.
-
-    Returns:
-        Object.
-
-    """
-    result = {columns[idx]: value for idx, value in enumerate(__row)}
-    return result
+    if name is None:
+        del workbook[workbook.active.title]
+        return workbook.create_sheet()
+    else:
+        del workbook[name]
+        return workbook.create_sheet(name)

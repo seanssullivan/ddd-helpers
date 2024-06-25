@@ -6,6 +6,8 @@ from __future__ import annotations
 import logging
 import pathlib
 from typing import Literal
+from typing import Type
+from typing import TypeVar
 from typing import Union
 
 # Local Imports
@@ -16,6 +18,9 @@ __all__ = ["BaseDirectoryWrapper", "BaseFileWrapper"]
 
 # Initiate logger.
 log = logging.getLogger("dodecahedron")
+
+# Custom types
+T = TypeVar("T")
 
 # Constants
 DEFAULT_ENCODING = "utf-8"
@@ -36,11 +41,11 @@ class BaseDirectoryWrapper(AbstractWrapper):
     """
 
     def __new__(
-        cls,
+        cls: Type[T],
         directory: pathlib.Path,
         /,
         encoding: str = DEFAULT_ENCODING,
-    ) -> BaseDirectoryWrapper:
+    ) -> T:
         if not isinstance(directory, pathlib.Path):
             message = f"expected type 'Path', got {type(directory)} instead"
             raise TypeError(message)
@@ -189,11 +194,11 @@ class BaseFileWrapper(AbstractWrapper):
     """
 
     def __new__(
-        cls,
+        cls: Type[T],
         filepath: pathlib.Path,
         /,
         encoding: str = DEFAULT_ENCODING,
-    ) -> BaseFileWrapper:
+    ) -> T:
         if not isinstance(filepath, pathlib.Path):
             message = f"expected type 'Path', got {type(filepath)} instead"
             raise TypeError(message)
