@@ -13,14 +13,14 @@ from __future__ import annotations
 from typing import Generator
 
 # Local Imports
-from .base_unit_of_work import BaseUnitOfWork
+from .abstract_unit_of_work import AbstractUnitOfWork
 from ..messages import BaseEvent
 from ..queue import MessageQueue
 
 __all__ = ["EventfulUnitOfWork"]
 
 
-class EventfulUnitOfWork(BaseUnitOfWork):
+class EventfulUnitOfWork(AbstractUnitOfWork):
     """Class implements an eventful unit of work."""
 
     def __init__(self, *args, **kwargs) -> None:

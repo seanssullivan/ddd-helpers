@@ -15,7 +15,7 @@ from typing import Optional
 from typing import TypeVar
 
 # Local Imports
-from .base_unit_of_work import BaseUnitOfWork
+from .abstract_unit_of_work import AbstractUnitOfWork
 
 
 # Custom types
@@ -25,7 +25,7 @@ T = TypeVar("T")
 SESSION_ATTR = "_session"
 
 
-class SessionedUnitOfWork(BaseUnitOfWork):
+class SessionedUnitOfWork(AbstractUnitOfWork):
     """Class implements a sessioned unit of work.
 
     Args:

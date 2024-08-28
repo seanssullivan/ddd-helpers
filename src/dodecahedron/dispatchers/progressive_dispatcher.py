@@ -25,4 +25,5 @@ class ProgressiveDispatcher(BaseDispatcher):
     @property
     def progress(self) -> AbstractProgressBar:
         """Progress bar."""
-        return getattr(self.messagebus.uow, "progress")
+        result = getattr(self.messagebus.uow, "progress")
+        return result

@@ -6,7 +6,6 @@ import importlib
 # Local Imports
 from .abstract_repository import *
 from .csv_repository import *
-from .directory_repositories import *
 from .eventful_repository import *
 
 try:

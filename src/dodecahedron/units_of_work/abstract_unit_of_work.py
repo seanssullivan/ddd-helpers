@@ -17,16 +17,38 @@ from typing import Type
 __all__ = ["AbstractUnitOfWork"]
 
 
+# Constants
+AUTO_COMMIT_ATTR = "_auto_commit"
+
+
 class AbstractUnitOfWork(abc.ABC):
     """Represents an abstract unit of work."""
 
-    @abc.abstractmethod
-    def __enter__(self) -> AbstractUnitOfWork:
-        raise NotImplementedError
+    @property
+    def auto_commit(self) -> bool:
+        """Whether to auto commit.
 
-    @abc.abstractmethod
+        Raises:
+            TypeError: when value is not type 'bool'.
+
+        """
+        result = getattr(self, AUTO_COMMIT_ATTR, False)
+        return result
+
+    @auto_commit.setter
+    def auto_commit(self, value: bool) -> None:
+        if not isinstance(value, bool):
+            message = f"expected type 'bool', got {type(value)} instead"
+            raise TypeError(message)
+
+        setattr(self, AUTO_COMMIT_ATTR, value)
+
+    def __enter__(self) -> AbstractUnitOfWork:
+        return self
+
     def __exit__(self, exc: Optional[Type[Exception]], *_) -> None:
-        raise NotImplementedError
+        if self.auto_commit is True and not exc:
+            self.commit()
 
     @abc.abstractmethod
     def commit(self) -> None:

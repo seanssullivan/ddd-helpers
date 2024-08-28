@@ -4,7 +4,6 @@
 # Standard Library Imports
 from __future__ import annotations
 import atexit
-import functools
 import logging
 from typing import Callable
 

@@ -5,13 +5,13 @@
 from __future__ import annotations
 
 # Local Imports
+from .abstract_unit_of_work import AbstractUnitOfWork
 from ..progress import AbstractProgressBar
-from .base_unit_of_work import BaseUnitOfWork
 
 __all__ = ["ProgressiveUnitOfWork"]
 
 
-class ProgressiveUnitOfWork(BaseUnitOfWork):
+class ProgressiveUnitOfWork(AbstractUnitOfWork):
     """Class implements a progressive unit of work.
 
     Args:

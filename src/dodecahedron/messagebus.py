@@ -27,8 +27,11 @@ Implementation based on 'Architecture Patterns in Python' message-bus pattern.
 # Standard Library Imports
 from __future__ import annotations
 import abc
+import functools
 import logging
 from operator import methodcaller
+from types import FunctionType
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import List
@@ -61,8 +64,17 @@ class AbstractMessageBus(abc.ABC):
 
     """
 
-    uow: AbstractUnitOfWork
-    queue: MessageQueue[BaseMessage]
+    @property
+    @abc.abstractmethod
+    def uow(self) -> AbstractUnitOfWork:
+        """Unit of work."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def queue(self) -> MessageQueue[BaseMessage]:
+        """Message queue."""
+        raise NotImplementedError
 
     @abc.abstractmethod
     def handle(self, message: BaseMessage) -> None:
@@ -101,17 +113,26 @@ class BaseMessageBus(AbstractMessageBus):
 
     """
 
-    queue: MessageQueue
-
     def __init__(
         self,
         uow: AbstractUnitOfWork,
         command_handlers: Dict[Type[BaseCommand], Callable],
         event_handlers: Dict[Type[BaseEvent], List[Callable]],
     ) -> None:
-        self.uow = uow
-        self.command_handlers = command_handlers
-        self.event_handlers = event_handlers
+        self._uow = uow
+        self._command_handlers = command_handlers
+        self._event_handlers = event_handlers
+        self._queue = MessageQueue()
+
+    @property
+    def uow(self) -> AbstractUnitOfWork:
+        """Unit of work."""
+        return self._uow
+
+    @property
+    def queue(self) -> MessageQueue[BaseMessage]:
+        """Message queue."""
+        return self._queue
 
     def handle(self, message: BaseMessage) -> None:
         """Handle a message.
@@ -122,7 +143,7 @@ class BaseMessageBus(AbstractMessageBus):
             message: Message.
 
         """
-        self.queue = MessageQueue([message])
+        self.queue.append(message)
         while self.queue:
             message = self.queue.popleft()
             self.handle_message(message)
@@ -136,9 +157,9 @@ class BaseMessageBus(AbstractMessageBus):
 
         """
         if issubclass(message, BaseCommand):
-            self.command_handlers[message] = handler
+            self._command_handlers[message] = handler
         elif issubclass(message, BaseEvent):
-            self.event_handlers[message].append(handler)
+            self._event_handlers[message].append(handler)
         else:
             error = f"{type(message)} is not a 'Command' or an 'Event'"
             raise TypeError(error)
@@ -166,10 +187,10 @@ class BaseMessageBus(AbstractMessageBus):
 
         """
         try:
-            handler = self.command_handlers[type(command)]
+            handler = self._command_handlers[type(command)]
             handler(command)
         except BaseError as error:
-            log.exception("Error handling command %s", command)
+            log.exception("Error handlings %s", command)
             raise error
         else:
             self.collect_events()
@@ -181,13 +202,12 @@ class BaseMessageBus(AbstractMessageBus):
             event: Event to handle.
 
         """
-        for handler in self.event_handlers[type(event)]:
+        for handler in self._event_handlers[type(event)]:
             try:
                 log.debug("handling event %s with handler %s", event, handler)
                 handler(event)
             except BaseError:
-                log.exception("Error handling event %s", event)
-                continue
+                log.exception("Error handling %s", event)
             else:
                 self.collect_events()
 
