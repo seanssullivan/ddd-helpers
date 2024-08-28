@@ -48,7 +48,7 @@ def has_extension(__file: Union[pathlib.Path, str], /, extension: str) -> bool:
         Whether file has expected extension.
 
     Raises:
-        TypeError: when `filepath` is not type `Path`.
+        TypeError: when `filepath` is not type `Path` or `str`.
         TypeError: when `extension` is not type `str`.
 
     """
@@ -133,7 +133,7 @@ def set_extension(__file: T, extension: str) -> T:
         File with extension.
 
     Raises:
-        TypeError: when `filename` is not type `str`.
+        TypeError: when `filename` is not type `Path` or `str`.
         TypeError: when `extension` is not type `str`.
 
     """

@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # pylint: disable=import-error
-# pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
 # Standard Library Imports
-from __future__ import annotations
 import collections
-from typing import Deque
-from typing import Optional
+import typing
 
 # Third-Party Imports
 # import pytest
@@ -21,6 +18,8 @@ from ... import factories
 
 
 class ExampleModel(AbstractAggregate):
+    """Example model for testing."""
+
     def __init__(self, ref: int) -> None:
         self._events = collections.deque()
         self._reference = ref
@@ -41,7 +40,7 @@ class ExampleModel(AbstractAggregate):
         return self._reference
 
     @property
-    def events(self) -> Deque:
+    def events(self) -> typing.Deque:
         return self._events
 
     def __contains__(self, _: object) -> bool:
@@ -58,8 +57,9 @@ class ExampleModel(AbstractAggregate):
 
 
 class ExampleRepository(EventfulRepository):
+    """Example repository for testing."""
 
-    def __init__(self, objects: Optional[list] = None) -> None:
+    def __init__(self, objects: typing.Optional[list] = None) -> None:
         super().__init__()
         self._objects = set(objects or [])
 

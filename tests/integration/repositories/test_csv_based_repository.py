@@ -15,6 +15,7 @@ from dodecahedron.wrappers import AbstractFileWrapper
 
 
 class ExampleRepository(AbstractCsvRepository):
+    """Example repository for testing."""
 
     def __init__(
         self, __file: typing.IO, objects: typing.Optional[list] = None
