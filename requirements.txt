@@ -1,6 +1,7 @@
 # Development requirements
 openpyxl
 pylint
+python-dateutil
 redis
 SQLAlchemy
 tqdm
