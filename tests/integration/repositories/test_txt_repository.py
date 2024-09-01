@@ -10,11 +10,11 @@ import typing
 import pytest
 
 # Local Imports
-from dodecahedron.repositories import AbstractCsvRepository
+from dodecahedron.repositories import AbstractTxtRepository
 from dodecahedron.wrappers import AbstractFileWrapper
 
 
-class ExampleRepository(AbstractCsvRepository):
+class ExampleRepository(AbstractTxtRepository):
     """Example repository for testing."""
 
     def __init__(
@@ -49,35 +49,10 @@ class ExampleRepository(AbstractCsvRepository):
         """Rollback changes."""
 
 
-@pytest.mark.parametrize("name", ["txt_io_wrapper", "xlsx_io_wrapper"])
-def test_raises_error_when_not_a_csv_file(
+@pytest.mark.parametrize("name", ["csv_file_wrapper", "xlsx_file_wrapper"])
+def test_raises_error_when_not_a_txt_file(
     name: str, request: pytest.FixtureRequest
 ) -> None:
-    with pytest.raises(TypeError, match="expected type 'CsvIOWrapper'"):
+    with pytest.raises(TypeError, match="expected type 'AbstractTxtWrapper'"):
         wrapper = request.getfixturevalue(name)  # type: AbstractFileWrapper
-        with wrapper.open() as file:
-            ExampleRepository(file)
-
-
-# def test_saves_a_csv_file(tempdir: str) -> None:
-#     temppath = pathlib.Path(tempdir)
-#     filepath = temppath / "test.csv"
-#     repo = CsvBasedRepository(filepath)
-
-#     obj = {"id": "1", "value": "TEST"}
-#     repo.add(obj)
-#     repo.commit()
-
-#     expected = temppath / "test.csv"
-#     assert expected.exists()
-
-
-# def test_loads_a_csv_file(make_csv_file: Callable[..., pathlib.Path]) -> None:
-#     rows = [["id", "value"], ["1", "TEST"]]
-#     filepath = make_csv_file("test.csv", rows)
-
-#     repo = CsvBasedRepository(filepath)
-#     result = repo.objects
-
-#     expected = [{"id": "1", "value": "TEST"}]
-#     assert result == expected
+        ExampleRepository(wrapper)

@@ -7,7 +7,7 @@ import typing
 
 # Local Imports
 from .file_repository import AbstractFileRepository
-from ..wrappers.xlsx_file_wrappers import XlsxIOWrapper
+from ..wrappers.xlsx_file_wrappers import AbstractXlsxWrapper
 
 # Initiate logger.
 log = logging.getLogger("dodecahedron")
@@ -24,14 +24,14 @@ class AbstractXlsxRepository(AbstractFileRepository):
 
     """
 
-    def __init__(self, __file: typing.IO, /) -> None:
-        if not isinstance(__file, XlsxIOWrapper):
-            expected = "expected type 'XlsxIOWrapper'"
+    def __init__(self, __file: typing.Any, /, *args, **kwargs) -> None:
+        if not isinstance(__file, AbstractXlsxWrapper):
+            expected = "expected type 'AbstractXlsxWrapper'"
             actual = f"got {type(__file)} instead"
             message = ", ".join([expected, actual])
             raise TypeError(message)
 
-        super().__init__(__file)
+        super().__init__(__file, *args, **kwargs)
 
     @property
     def columns(self) -> typing.Optional[typing.Sequence]:

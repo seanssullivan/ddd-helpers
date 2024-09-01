@@ -49,14 +49,13 @@ class ExampleRepository(AbstractXlsxRepository):
         """Rollback changes."""
 
 
-@pytest.mark.parametrize("name", ["csv_io_wrapper", "txt_io_wrapper"])
+@pytest.mark.parametrize("name", ["csv_file_wrapper", "txt_file_wrapper"])
 def test_raises_error_when_not_an_xlsx_file(
     name: str, request: pytest.FixtureRequest
 ) -> None:
-    with pytest.raises(TypeError, match="expected type 'XlsxIOWrapper'"):
+    with pytest.raises(TypeError, match="expected type 'AbstractXlsxWrapper'"):
         wrapper = request.getfixturevalue(name)  # type: AbstractFileWrapper
-        with wrapper.open() as file:
-            ExampleRepository(file)
+        ExampleRepository(wrapper)
 
 
 # def test_saves_an_xlsx_file(tempdir: str) -> None:

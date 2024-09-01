@@ -37,8 +37,13 @@ def to_y_or_n(
 
     try:
         result = to_yes_or_no(__value)
+
+    except TypeError:
+        message = f"{type(__value)} cannot be converted to 'Y' or 'N'"
+        raise ValueError(message)
+
     except ValueError:
-        message = f"{__value} cannot be converted to 'Y' or 'N'"
+        message = f"'{__value}' cannot be converted to 'Y' or 'N'"
         raise ValueError(message)
 
     return result[0] if result else default
@@ -73,7 +78,7 @@ def to_yes_or_no(
     if isinstance(__value, str):
         return _from_string(__value, default)
 
-    raise ValueError(f"{__value} cannot be converted to 'Yes' or 'No'")
+    raise TypeError(f"{type(__value)} cannot be converted to 'Yes' or 'No'")
 
 
 def _from_boolean(__value: bool, /) -> Literal["No", "Yes"]:
@@ -126,7 +131,7 @@ def _from_string(
         ValueError: when value cannot be converted to `Yes` or `No`.
 
     """
-    value = __value.replace("  ", "").strip()
+    value = __value.replace("  ", " ").strip()
     if not value:
         return default
 
@@ -136,4 +141,4 @@ def _from_string(
     if value.lower() in FALSY_VALUES:
         return "No"
 
-    raise ValueError(f"{__value} cannot be converted to 'Yes' or 'No'")
+    raise ValueError(f"'{__value!s}' cannot be converted to 'Yes' or 'No'")

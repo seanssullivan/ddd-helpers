@@ -14,7 +14,7 @@ import typing
 
 # Local Imports
 from .file_repository import AbstractFileRepository
-from ..wrappers.csv_file_wrappers import CsvIOWrapper
+from ..wrappers.csv_file_wrappers import AbstractCsvWrapper
 
 __all__ = ["AbstractCsvRepository"]
 
@@ -34,14 +34,14 @@ class AbstractCsvRepository(AbstractFileRepository):
 
     """
 
-    def __init__(self, __file: typing.IO, /) -> None:
-        if not isinstance(__file, CsvIOWrapper):
-            expected = "expected type 'CsvIOWrapper'"
+    def __init__(self, __file: typing.Any, /, *args, **kwargs) -> None:
+        if not isinstance(__file, AbstractCsvWrapper):
+            expected = "expected type 'AbstractCsvWrapper'"
             actual = f"got {type(__file)} instead"
             message = ", ".join([expected, actual])
             raise TypeError(message)
 
-        super().__init__(__file)
+        super().__init__(__file, *args, **kwargs)
 
     @property
     def columns(self) -> typing.Optional[typing.Sequence]:

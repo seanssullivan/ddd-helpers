@@ -3,7 +3,7 @@
 
 # Standard Library Imports
 from __future__ import annotations
-import io
+import abc
 import json
 import os
 import typing
@@ -12,6 +12,7 @@ import typing
 from .abstract_file_wrappers import AbstractDirectoryWrapper
 from .abstract_file_wrappers import AbstractFileWrapper
 from .abstract_file_wrappers import AbstractTextWrapper
+from .abstract_file_wrappers import AbstractIOWrapper
 from ..utils import converters
 from .. import settings
 from .. import utils
@@ -22,25 +23,23 @@ __all__ = ["JsonDirectoryWrapper", "JsonFileWrapper"]
 class AbstractJsonWrapper(AbstractTextWrapper):
     """Represents an abstract wrapper class for `.json` files."""
 
-    def _init_json_io_wrapper(
-        self,
-        __buffer: memoryview,
-        /,
-        encoding: str = settings.DEFAULT_FILE_ENCODING,
-    ) -> JsonIOWrapper:
+    @property
+    @abc.abstractmethod
+    def indent(self) -> typing.Optional[typing.Union[int, str]]:
+        """Indent."""
+        raise NotImplementedError
+
+    def _init_json_io_wrapper(self, __file: typing.IO, /) -> JsonIOWrapper:
         """Initialize I/O wrapper for `.json` file.
 
         Args:
-            __buffer: Buffer.
+            __file: File-like object.
 
         Returns:
             I/O wrapper instance.
 
         """
-        result = JsonIOWrapper(
-            __buffer,
-            encoding=encoding,
-        )
+        result = JsonIOWrapper(__file)
         setattr(result, "_context", self)
         return result
 
@@ -51,6 +50,7 @@ class JsonDirectoryWrapper(AbstractJsonWrapper, AbstractDirectoryWrapper):
     Args:
         directory: Directory from which to load `.json` file(s).
         encoding (optional): File encoding. Default `utf-8`.
+        indent (optional): Indent. Default ``None``.
         read_only (optional): Whether file is read only. Default ``False``.
 
     """
@@ -60,6 +60,7 @@ class JsonDirectoryWrapper(AbstractJsonWrapper, AbstractDirectoryWrapper):
         directory: os.PathLike,
         *,
         encoding: str = settings.DEFAULT_FILE_ENCODING,
+        indent: typing.Optional[typing.Union[int, str]] = None,
         read_only: bool = False,
     ) -> None:
         super().__init__(
@@ -68,8 +69,14 @@ class JsonDirectoryWrapper(AbstractJsonWrapper, AbstractDirectoryWrapper):
             extension=settings.JSON_EXTENSION,
             read_only=read_only,
         )
+        self._indent = indent
 
-    def open(self, filename: str, /, mode: str = "r") -> typing.IO:
+    @property
+    def indent(self) -> typing.Optional[typing.Union[int, str]]:
+        """Indent."""
+        return self._indent
+
+    def open(self, filename: str, /, mode: str = "r") -> JsonIOWrapper:
         """Open a `.json` file and return a file object.
 
         Args:
@@ -84,7 +91,7 @@ class JsonDirectoryWrapper(AbstractJsonWrapper, AbstractDirectoryWrapper):
 
         """
 
-        file = super().open(filename, mode=converters.to_bytes_file_mode(mode))
+        file = super().open(filename, mode=converters.to_text_file_mode(mode))
         result = self._init_json_io_wrapper(file)
         return result
 
@@ -95,6 +102,7 @@ class JsonFileWrapper(AbstractJsonWrapper, AbstractFileWrapper):
     Args:
         filepath: Path to `.json` file.
         encoding (optional): File encoding. Default `utf-8`.
+        indent (optional): Indent. Default ``None``.
         read_only (optional): Whether file is read only. Default ``False``.
 
     Raises:
@@ -107,6 +115,7 @@ class JsonFileWrapper(AbstractJsonWrapper, AbstractFileWrapper):
         filepath: os.PathLike,
         *,
         encoding: str = settings.DEFAULT_FILE_ENCODING,
+        indent: typing.Optional[typing.Union[int, str]] = None,
         read_only: bool = False,
     ) -> None:
         super().__init__(
@@ -116,7 +125,14 @@ class JsonFileWrapper(AbstractJsonWrapper, AbstractFileWrapper):
         )
         utils.raise_for_extension(filepath, settings.JSON_EXTENSION)
 
-    def open(self, mode: str = "r") -> typing.IO:
+        self._indent = indent
+
+    @property
+    def indent(self) -> typing.Optional[typing.Union[int, str]]:
+        """Indent."""
+        return self._indent
+
+    def open(self, mode: str = "r") -> JsonIOWrapper:
         """Open the `.json` file and return a file object.
 
         Args:
@@ -126,37 +142,66 @@ class JsonFileWrapper(AbstractJsonWrapper, AbstractFileWrapper):
             File object.
 
         """
-        file = super().open(converters.to_bytes_file_mode(mode))
+        file = super().open(converters.to_text_file_mode(mode))
         result = self._init_json_io_wrapper(file)
         return result
 
 
-class JsonIOWrapper(io.TextIOWrapper):
+class JsonIOWrapper(AbstractIOWrapper):
     """Implements a I/O wrapper for `.json` files."""
 
-    def __init__(
-        self,
-        buffer: memoryview,
-        encoding: typing.Optional[str] = None,
-        errors: typing.Optional[str] = None,
-        newline: typing.Optional[str] = None,
-        line_buffering: bool = False,
-        write_through: bool = False,
-    ) -> None:
-        super().__init__(
-            buffer,
-            encoding=encoding,
-            errors=errors,
-            newline=newline,
-            line_buffering=line_buffering,
-            write_through=write_through,
-        )
+    def __init__(self, __file: typing.IO) -> None:
+        self._file = __file
         self._context = None  # type: typing.Optional[AbstractJsonWrapper]
+
+    @property
+    def file(self) -> typing.IO:
+        """File."""
+        return self._file
+
+    @property
+    def closed(self) -> bool:
+        """Whether file is closed."""
+        return self._file.closed
+
+    @property
+    def indent(self) -> typing.Optional[typing.Union[int, str]]:
+        """Indent."""
+        default = getattr(self._context, "indent", None)
+        result = getattr(self, "_indent", default)
+        return result
+
+    @indent.setter
+    def indent(self, value: typing.Any) -> None:
+        if not isinstance(value, (int, str)):
+            expected = "expected type 'int' or 'str'"
+            actual = f"got {type(value)} instead"
+            message = ", ".join([expected, actual])
+            raise TypeError(message)
+
+        setattr(self, "_indent", value)
+
+    @property
+    def read_only(self) -> bool:
+        """Whether read only."""
+        return getattr(self._context, "read_only")  # type: bool
+
+    def __enter__(self) -> JsonIOWrapper:
+        return self
+
+    def __exit__(self, *_) -> None:
+        self.close()
+        return
+
+    def close(self) -> None:
+        """Close `.csv` file."""
+        self._file.close()
 
     def dump(self, obj: typing.Any) -> None:
         """Serialize `obj` to file."""
-        json.dump(obj, self)
+        json.dump(obj, self._file)
 
     def load(self) -> typing.Any:
         """Deserialize contents of file."""
-        return json.load(self)
+        result = json.load(self._file)
+        return result

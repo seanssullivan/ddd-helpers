@@ -41,4 +41,5 @@ def is_empty(__value: object, /) -> bool:
         Whether value is empty.
 
     """
-    return __value == ""
+    result = __value == ""
+    return result

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+__version__ = "0.0"
+__release__ = __version__ + ".19"
+
 # Local Imports
 from .dispatchers import *
 from .errors import *
@@ -12,6 +15,4 @@ from .queue import *
 from .repositories import *
 from .units_of_work import *
 
-
-__version__ = "0.0"
-__release__ = __version__ + ".19"
+from dateutil.parser import parse

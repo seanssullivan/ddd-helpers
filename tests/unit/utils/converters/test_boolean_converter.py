@@ -23,5 +23,5 @@ def test_returns_falsey_values(value) -> None:
 
 
 def test_returns_default_when_none() -> None:
-    result = converters.to_boolean(None, "success")
-    assert result == "success"
+    result = converters.to_boolean(None, True)
+    assert result is True

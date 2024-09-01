@@ -1,16 +1,2 @@
-# Development requirements
-openpyxl
-pylint
-python-dateutil
-redis
-SQLAlchemy
-tqdm
-
-# Testing requirements
-coverage
-fpdf
-pytest
-pytest-cov
-tox
-types-openpyxl
-XlsxWriter
+# Requirements
+-r requirements/development.txt

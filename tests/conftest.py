@@ -68,16 +68,14 @@ def make_json_file(
 
     """
 
-    def _make_file(
-        filename: str, content: typing.Optional[dict] = None
-    ) -> pathlib.Path:
+    def _make_file(filename: str, content: typing.Any = None) -> pathlib.Path:
         if not isinstance(filename, str):
             message = f"expected type 'str', got {type(filename)} instead"
             raise TypeError(message)
 
         path = pathlib.Path(tempdir) / filename
         with path.open("w") as file:
-            json.dump(content or {}, file)
+            json.dump(content or [], file)
 
         return path
 

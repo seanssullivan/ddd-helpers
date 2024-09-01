@@ -53,14 +53,14 @@ def _from_string(__value: str, /, default: float) -> float:
         message = f"expected type 'str', got {type(__value)} instead"
         raise TypeError(message)
 
-    value = __value.replace("  ", "").strip()
+    value = __value.replace("  ", " ").strip()
     if not value:
         return default
 
     try:
-        result = float(
-            re.sub(r"(\d+),?(\d*.?\d*)\s?m?", r"\1\2", value, flags=re.I)
-        )
+        pattern = r"(\d+),?(\d*.?\d*)\s?m?"
+        replacement = r"\1\2"
+        result = float(re.sub(pattern, replacement, value, flags=re.I))
     except ValueError:
         raise ValueError(f"{type(__value)} cannot be converted to distance")
     else:

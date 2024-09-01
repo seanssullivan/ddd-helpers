@@ -12,9 +12,9 @@ from dodecahedron import wrappers
 
 
 @pytest.fixture
-def csv_io_wrapper(
+def csv_file_wrapper(
     make_csv_file: typing.Callable[[str, typing.Optional[list]], pathlib.Path],
-) -> wrappers.TxtFileWrapper:
+) -> wrappers.CsvFileWrapper:
     """Fixture to make `txt` IO wrapper."""
     path = make_csv_file("test.csv", [])
     result = wrappers.CsvFileWrapper(path)
@@ -22,7 +22,7 @@ def csv_io_wrapper(
 
 
 @pytest.fixture
-def txt_io_wrapper(
+def txt_file_wrapper(
     make_txt_file: typing.Callable[[str, typing.Optional[str]], pathlib.Path],
 ) -> wrappers.TxtFileWrapper:
     """Fixture to make `txt` IO wrapper."""
@@ -32,7 +32,7 @@ def txt_io_wrapper(
 
 
 @pytest.fixture
-def xlsx_io_wrapper(
+def xlsx_file_wrapper(
     make_xlsx_file: typing.Callable[
         [str, typing.Optional[list]], pathlib.Path
     ],

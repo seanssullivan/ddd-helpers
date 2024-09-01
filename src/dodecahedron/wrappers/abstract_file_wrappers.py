@@ -13,6 +13,7 @@ from .. import settings
 from .. import utils
 
 __all__ = [
+    "AbstractFileSystemWrapper",
     "AbstractDirectoryWrapper",
     "AbstractFileWrapper",
 ]

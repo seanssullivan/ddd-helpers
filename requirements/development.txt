@@ -1,0 +1,10 @@
+# Development requirements
+-r testing.txt
+build
+mypy
+openpyxl
+pylint
+redis
+SQLAlchemy
+tqdm
+wheel

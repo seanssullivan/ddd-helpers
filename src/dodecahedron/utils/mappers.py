@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Standard Library Imports
-from typing import Any
-from typing import Callable
-from typing import Dict
-from typing import Sequence
-from typing import Union
+import typing
 
 __all__ = ["apply_mapper"]
 
@@ -18,7 +14,7 @@ TARGETS = (LOCAL, REMOTE)
 
 def apply_mapper(
     data: dict,
-    mapper: Dict[str, Union[dict, str]],
+    mapper: typing.Dict[str, typing.Union[dict, str]],
     target: str = REMOTE,
 ) -> dict:
     """Apply mapper.
@@ -43,7 +39,9 @@ def apply_mapper(
         return _to_remote_object(data, std_mapper)
 
 
-def _standardize_mapper(__mapper: Dict[str, Any], /) -> Dict[str, dict]:
+def _standardize_mapper(
+    __mapper: typing.Dict[str, typing.Any], /
+) -> typing.Dict[str, dict]:
     """Standardize mapper.
 
     Args:
@@ -68,7 +66,7 @@ def _standardize_mapper(__mapper: Dict[str, Any], /) -> Dict[str, dict]:
     return result
 
 
-def _to_local_object(__data: dict, /, mapper: Dict[str, dict]) -> dict:
+def _to_local_object(__data: dict, /, mapper: typing.Dict[str, dict]) -> dict:
     """Remap data to local object.
 
     Args:
@@ -90,7 +88,7 @@ def _to_local_object(__data: dict, /, mapper: Dict[str, dict]) -> dict:
     return result
 
 
-def _to_remote_object(__data: dict, /, mapper: Dict[str, dict]) -> dict:
+def _to_remote_object(__data: dict, /, mapper: typing.Dict[str, dict]) -> dict:
     """Remap data to remote object.
 
     Args:
@@ -118,8 +116,8 @@ def _to_remote_object(__data: dict, /, mapper: Dict[str, dict]) -> dict:
 def _apply_converter(
     __value,
     /,
-    mapper: Dict[str, dict],
-) -> Any:
+    mapper: typing.Dict[str, dict],
+) -> typing.Any:
     """Apply converter.
 
     Args:
@@ -131,7 +129,7 @@ def _apply_converter(
 
     """
     if "converter" in mapper:
-        converter = mapper["converter"]  # type: Callable
+        converter = mapper["converter"]  # type: typing.Callable
         result = converter(__value)
     else:
         result = __value
@@ -139,7 +137,7 @@ def _apply_converter(
     return result
 
 
-def _is_null(__value: Any, /) -> bool:
+def _is_null(__value: typing.Any, /) -> bool:
     """Check whether value is equivalent to ``None``.
 
     Args:
@@ -155,7 +153,7 @@ def _is_null(__value: Any, /) -> bool:
     if isinstance(__value, str) and __value == "":
         return True
 
-    if isinstance(__value, Sequence) and not __value:
+    if isinstance(__value, typing.Sequence) and not __value:
         return True
 
     return False

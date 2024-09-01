@@ -7,6 +7,7 @@ import importlib
 from .abstract_repository import *
 from .csv_repository import *
 from .eventful_repository import *
+from .txt_repository import *
 
 try:
     importlib.import_module("sqlalchemy")

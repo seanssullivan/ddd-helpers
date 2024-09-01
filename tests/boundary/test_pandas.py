@@ -8,8 +8,11 @@ import pathlib
 from typing import Callable
 
 # Third-Party
-import pandas as pd
 import pytest
+
+pytestmark = pytest.importorskip("pandas")
+
+import pandas as pd
 
 
 def test_raises_error_when_columns_expected_but_not_found(

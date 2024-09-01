@@ -53,7 +53,7 @@ def _from_string(__value: str, /, default: int) -> int:
         message = f"expected type 'str', got {type(__value)} instead"
         raise TypeError(message)
 
-    value = __value.replace("  ", "").strip()
+    value = __value.replace("  ", " ").strip()
     if not value:
         return default
 
