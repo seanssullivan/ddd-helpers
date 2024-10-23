@@ -1,4 +1,5 @@
 # Development requirements
+build
 openpyxl
 pylint
 redis
